@@ -471,6 +471,12 @@
         flex-direction:row;
         align-items: center;
         justify-content: flex-start;
+        -webkit-box-orient: vertical;
+        text-overflow: ellipsis;
+        display: -webkit-box;
+        -webkit-line-clamp: 1;
+        overflow: hidden;
+        lines: 1;
     }
     .truck-name-tag{
         margin-right:20px;

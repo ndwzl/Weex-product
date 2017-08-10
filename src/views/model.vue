@@ -869,26 +869,21 @@
         flex-direction:row;
     }
     .model-name{
-        width:550px;
-        flex: 1;
-        flex-wrap:wrap;
-        justify-content: flex-start;
-        align-items: flex-start;
-        flex-direction:row;
+      position: relative;
+      width:550px;
+      height:80px;
+      flex: 1;
     }
     .model-name-text{
         color: #333;
         font-size:28px;
         margin-right:20px;
         margin-bottom:10px;
-        -webkit-box-orient: vertical;
-        text-overflow: ellipsis;
-        display: -webkit-box;
-        -webkit-line-clamp: 2;
-        overflow: hidden;
-        lines: 2;
     }
     .examine-similar{
+        position:absolute;
+        right:30px;
+        bottom:14px;
         color:#586C94;
         font-size:28px;
         text-decoration: underline;

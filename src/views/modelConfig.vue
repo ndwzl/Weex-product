@@ -7,11 +7,11 @@
                 <title :titleName="titleName"></title>
                 <!--对比车型名称-->
                 <div class="product-name-wrapper">
-                    <product-name :products="configData.products" @clear="clear" @goAddSeries="addSeriesPop"></product-name>
+                    <product-name :products="configData.products" :compareNumber="compareNumber"  @clear="clear" @goAddSeries="addSeriesPop"></product-name>
                 </div>
                 <div v-if="floatTitle && !addSeriesShow" class="float-title">
                     <div v-if="iosTop" class="ios-top"></div>
-                    <product-name :products="configData.products" @clear="clear" @goAddSeries="addSeriesPop"></product-name>
+                    <product-name :products="configData.products" :compareNumber="compareNumber"  @clear="clear" @goAddSeries="addSeriesPop"></product-name>
                 </div>
             </cell>
             <!--对比车型选项-->
@@ -117,6 +117,8 @@
                 seriesInfo:{},
                 //是否显示浮层title
                 floatTitle:false,
+                //对比的数量
+                compareNumber:'',
                 //配置数据
                 configData:{
                     //对比车型
@@ -235,6 +237,8 @@
                             //低价和厂商报价
                             this.configData.lowPrice.push(ele.data.lowPrice);
 
+                            //对比的数量
+                            this.compareNumber = this.configData.paramList.length,
                             //对比信息
                             this.configData.paramList.push(ele.data.paramList)
 
@@ -313,6 +317,8 @@
                         }
                     }
                 })
+                // 更新对比数量
+                this.compareNumber--;
             },
             //是否显示分类内容弹层
             classifyShow(){
@@ -411,6 +417,9 @@
                                                     this.$set(this.configData.products, index, list.proInfo)
                                                     this.$set(this.configData.lowPrice, index, list.lowPrice)
                                                 })
+
+                                                //对比的数量
+                                                this.compareNumber = roductInfo.data.data.length;
 
                                                 //增加对比pv
                                                 if(productInfo.data.data.length == 2){

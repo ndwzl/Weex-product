@@ -1,5 +1,6 @@
 <template>
     <div class="photo-info">
+        <div v-if="iosTop" class="ios-top"></div>
         <title :titleName="titleName" black="black" :imgInfo="imgInfo" @goback="goback"></title>
         <!--<div class="img-title" v-if="!imgInfo">-->
 
@@ -74,6 +75,8 @@
                 pageType:'',
                 forNum:0,
                 open:true,
+                //苹果头部白条
+                iosTop:false,
             }
         },
         created(){
@@ -91,6 +94,12 @@
                     this.tagName = JSON.parse(ele.data);
                 }
             });
+
+            //如果是ios系统的话
+            if(weex.config.env.platform == 'iOS'){
+                //头部的高度
+                this.iosTop = true;
+            }
 
             //获取车型id
             storage.getItem('imgProductId',ele => {
@@ -296,6 +305,10 @@
 </script>
 
 <style scoped>
+    .ios-top{
+        height:40px;
+        background-color: #000;
+    }
     .img-title{
         height:90px;
     }

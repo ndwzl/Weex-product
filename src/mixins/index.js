@@ -46,6 +46,10 @@ export default {
         },
         //跳入到weex页面
         goWeexUrl(url){
+            //如果是苹果 点击的时候显示弹层，之后在去掉
+            if(weex.config.env.platform == 'iOS'){
+              this.showLoading()
+            }
             //查看版本号
             storage.getItem('versions',res => {
                 if(res.result == 'success'){
@@ -66,10 +70,12 @@ export default {
                     })
                 }
             })
-            //this.getData("http://192.168.1.76:8080/dist/" + url,ele => {
+
+            // this.getData("http://192.168.250.178:8080/dist/" + url,ele => {
+            //   // this.alert(JSON.stringify(ele))
             //    if(ele.statusText == 'OK'){
             //        navigator.push({
-            //            url: "http://192.168.1.76:8080/dist/" + url,
+            //            url: "http://192.168.250.178:8080/dist/" + url,
             //            animated: 'true'
             //        },() => {
             //            //隐藏加载loading
@@ -80,7 +86,7 @@ export default {
             //        //隐藏加载loading
             //        this.hideLoading()
             //    }
-            //})
+            // })
         },
         //get请求数据
         getData(ajaxUrl,callback,type){
@@ -229,13 +235,13 @@ export default {
         //GA统计
         // PV/UV
         collect (o){
-            let uid = '';
+            let userId = '';
             let deviceid = '';
 
             //如果是安卓
             if(weex.config && weex.config.deviceId){
                 deviceid = weex.config.deviceId;
-                uid      = weex.config.uid;
+                userId      = weex.config.userId;
             }else{
                 // IOS
                 storage.getItem('deviceId',ele => {
@@ -244,8 +250,8 @@ export default {
                     }
                 });
 
-                storage.getItem('uid',ele => {
-                    uid = ele.data;
+                storage.getItem('userId',ele => {
+                    userId = ele.data;
                 })
             }
 
@@ -264,30 +270,30 @@ export default {
 
                 var epnonestats = +new Date() + '_' + (Math.floor(Math.random () * 90) + 10)//btoa(+new Date()).substring(0,16);  // 16位随机串
 
-                let parameter = `epnonestats=${epnonestats}&type=enter&source=${platform}&deviceid=${deviceid}&uid=${uid}&p1=${p1}&p2=${p2}`;
+                let parameter = `epnonestats=${epnonestats}&type=enter&source=${platform}&deviceid=${deviceid}&uid=${userId}&p1=${p1}&p2=${p2}`;
                 for(let i in o){
                     parameter += `&${i}=${o[i]}`
                 }
                 //发送
                 this.send(parameter,ele => {
                     if(ele.ok){
-                        //this.alert(parameter)
+                        // this.alert(parameter)
                         clearTimeout(time)
                     }
                 })
 
-            },200)
+            },300)
 
         },
         //  事件类
         event (o){
-            var uid = '';
+            var userId = '';
             var deviceid = '';
 
             //如果是安卓
             if(weex.config && weex.config.deviceId){
                 deviceid = weex.config.deviceId;
-                uid      = weex.config.uid;
+                userId      = weex.config.userId;
             }else{
                 // IOS
                 storage.getItem('deviceId',ele => {
@@ -296,8 +302,8 @@ export default {
                     }
                 });
 
-                storage.getItem('uid',ele => {
-                    uid = ele.data;
+                storage.getItem('userId',ele => {
+                    userId = ele.data;
                 })
             }
 
@@ -318,7 +324,7 @@ export default {
 
             let time = setTimeout(() => {
 
-                let parameter = `type=click&source=${platform}&deviceid=${deviceid}&uid=${uid}&p1=${p1}&p2=${p2}`;
+                let parameter = `type=click&source=${platform}&deviceid=${deviceid}&uid=${userId}&p1=${p1}&p2=${p2}`;
                 for (let i in o) {
                     parameter += `&${i}=${o[i]}`
                 }
@@ -329,7 +335,7 @@ export default {
                         clearTimeout(time)
                     }
                 })
-            },200)
+            },300)
         },
         //发送
         send (parameter,callback){

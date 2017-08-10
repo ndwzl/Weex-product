@@ -222,7 +222,7 @@
             }
 
             //发送GA
-//            this.goUrlGa(weex.config.deviceId,'product.m.360che.com','产品库-询底价页','询底价')
+           this.goUrlGa(weex.config.deviceId,'product.m.360che.com','产品库-询底价页','询底价')
 
             //获取车系信息
             storage.getItem('seriesInfo',ele => {
@@ -462,7 +462,7 @@
             closeBtn(){
                 this.promptShow = false;
             },
-        
+
             // 提交询底价入口
             commitData(){
                 // 如果姓名不对
@@ -560,7 +560,7 @@
             selectStatement(){
                 this.statement = !this.statement;
             },
-            
+
             // 请求提交数据
             getSubmitData(){
                 let ajaxUrl =  'http://api.dealer.360che.com/inquiryprice/Dealer/submitClues.aspx?relname=' + encodeURI(this.priceData.relname) + '&tel='+ this.priceData.tel +'&truckid='+ this.priceData.truckid +'&provincesn='+ this.priceData.provincesn +'&citysn='+ this.priceData.citysn +'&townsn=&buycount='+ this.priceData.buycount +'&shopstr=' + this.priceData.shopstr + '&clueresource=' + this.priceData.clueresource;
@@ -641,7 +641,7 @@
         border-bottom-left-radius: 8px;
         border-bottom-right-radius: 8px;
         font-size: 28px;
-        color: #333; 
+        color: #333;
     }
     .phone{
         padding-top: 26px;
@@ -659,7 +659,7 @@
         border-bottom-left-radius: 8px;
         border-bottom-right-radius: 8px;
         font-size: 28px;
-        color: #333;  
+        color: #333;
     }
     .icon{
         position: absolute;
@@ -731,11 +731,11 @@
     .city{
         height: 88px;
         align-items: center;
-        justify-content: center; 
+        justify-content: center;
     }
     .city-text{
        font-size: 28px;
-       color: #333; 
+       color: #333;
     }
     .submit{
         position: fixed;
@@ -814,7 +814,7 @@
         align-items: center;
         border: solid;
         border-color: #e5e5e5;
-        border-width: 2px;    
+        border-width: 2px;
     }
     .add-icon{
         color: #333;
@@ -881,7 +881,7 @@
     }
     .agree-text{
         font-size: 32px;
-        color: #333; 
+        color: #333;
     }
     .disable{
         color: #999;

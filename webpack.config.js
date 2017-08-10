@@ -16,6 +16,15 @@ var bannerPlugin = new webpack.BannerPlugin(
     {raw: true}
 )
 
+var optimizePlugin = new webpack.optimize.UglifyJsPlugin({
+  compress: {
+    warnings: false
+  },
+  //保留banner
+  comments: /{ "framework": "Vue" }/,
+  sourceMap: true
+})
+
 
 function getBaseConfig() {
     return {
@@ -107,13 +116,9 @@ function getBaseConfig() {
             // })]
         },
         plugins: [
-            bannerPlugin
-            //new webpack.optimize.UglifyJsPlugin({
-            //    compress: {
-            //        warnings: true
-            //    }
-            //})
-        ]//
+            bannerPlugin,
+            optimizePlugin
+        ]
     }
 }
 

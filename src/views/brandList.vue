@@ -255,6 +255,8 @@
             },
             //显示历史记录
             historyShow(){
+              // this.alert(1)
+              console.log('展开历史记录')
                 //隐藏展开更多车系按钮
                 this.moreSeriesButtonShow = false;
                 //隐藏sidebar内容标题
@@ -473,9 +475,10 @@
             }
 
             //存储uid
-            if(weex.config.uid){
-                storage.setItem('uid',weex.config.uid)
+            if(weex.config.userId){
+                storage.setItem('userId',weex.config.userId)
             }
+            // this.alert(JSON.stringify(weex.config.userId))
 
 //            //发送GA统计
             this.collect({

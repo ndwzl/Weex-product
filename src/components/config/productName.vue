@@ -4,7 +4,7 @@
         <div class="caption">
             <text class="title">车型名称</text>
             <div class="number">
-                <text class="existing">{{products.length}}</text>
+                <text class="existing">{{compareNumber}}</text>
                 <text class="total">/2</text>
             </div>
         </div>
@@ -55,7 +55,7 @@
                 seriesId:'',
             }
         },
-        props:['products','price','footerPrice'],
+        props:['products','compareNumber','price','footerPrice'],
         methods:{
             clear(index){
                 this.$emit('clear',index)

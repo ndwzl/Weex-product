@@ -7,11 +7,11 @@
                 <title titleName="车型对比"></title>
                 <!--对比车型名称-->
                 <div class="product-name-wrapper">
-                    <product-name :products="configData.products" @clear="clear" footerPrice="true" @goAddSeries="addSeriesPop"></product-name>
+                    <product-name :products="configData.products" @clear="clear" :compareNumber="compareNumber"  footerPrice="true" @goAddSeries="addSeriesPop"></product-name>
                 </div>
                 <div v-if="floatTitle && !addSeriesShow" class="float-title">
                     <div v-if="iosTop" class="ios-top"></div>
-                    <product-name :products="configData.products" @clear="clear" footerPrice="true" @goAddSeries="addSeriesPop"></product-name>
+                    <product-name :products="configData.products" @clear="clear" :compareNumber="compareNumber"  footerPrice="true" @goAddSeries="addSeriesPop"></product-name>
                 </div>
             </cell>
             <!--对比车型选项-->
@@ -108,6 +108,8 @@
                 seriesInfo:{},
                 //是否显示浮层title
                 floatTitle:false,
+                //对比的数量
+                compareNumber:'',
                 //配置数据
                 configData:{
                     //对比车型
@@ -177,6 +179,8 @@
                                             this.$set(this.configData.lowPrice,index,list.lowPrice)
                                         })
 
+                                        //对比的数量
+                                        this.compareNumber = ele.data.products.length,
 
                                         //存储对比记录
                                         storage.getItem('compare_history',history => {
@@ -301,6 +305,9 @@
                         }
                     }
                 })
+
+                // 更新对比数量
+                this.compareNumber--;
             },
             //是否显示分类内容弹层
             classifyShow(){
@@ -398,6 +405,10 @@
                                                     this.$set(this.configData.products, index, list.proInfo)
                                                     this.$set(this.configData.lowPrice, index, list.lowPrice)
                                                 })
+
+
+                                                //对比的数量
+                                                this.compareNumber = productInfo.data.products.length;
 
 
                                                 //增加对比pv

@@ -13,8 +13,8 @@
         <div class="inner" @click="goUrl('https://top.m.360che.com/')">
             <text class="nav-text">排行榜</text>
         </div>
-        <div class="history" @click="historyShow">
-            <image src="https://s.kcimg.cn/wap/images/app_icon/history.png" style="width:32px;height:32px;"></image>
+        <div class="history" @click="historyShow" >
+            <image  @click="historyShow" src="https://s.kcimg.cn/wap/images/app_icon/history.png" style="width:32px;height:32px;"></image>
             <!--<text :style="{fontFamily:'detail',color:'#999',fontSize:'32px'}">&#x53f2;</text>-->
         </div>
     </div>
@@ -60,9 +60,10 @@
         position:absolute;
         right:0;
         top:0;
-        width:80px;
-        height:88px;
+        width:100px;
+        height:100px;
         justify-content:center;
         align-items:center;
+        z-index:15;
     }
 </style>

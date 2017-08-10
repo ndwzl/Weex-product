@@ -62,7 +62,7 @@
         data(){
             return {
                 recommendDate:{
-                    
+
                 },
                 // 询底价标题
                 titleName:'询价成功',
@@ -194,7 +194,7 @@
                 })
 
                 //请求推荐经销商
-                this.getData('http://api.dealer.360che.com/inquiryprice/Dealer/getDealerList.aspx?productid=' + productInfo.F_ProductId + '&provincesn=' + this.locationInfo.provinceId + '&citysn=' + this.locationInfo.cityId  + '&type=1',ele => {
+                this.getData('https://dealer-api.360che.com/inquiryprice/Dealer/getDealerList.aspx?productid=' + productInfo.F_ProductId + '&provincesn=' + this.locationInfo.provinceId + '&citysn=' + this.locationInfo.cityId  + '&type=1',ele => {
                     if(ele.ok){
                         let arr = [];
                         if(ele.data.length){
@@ -210,7 +210,7 @@
                         console.log(productInfo.F_ProductId)
 
                         //发送请求
-                        let ajaxUrl =  'http://api.dealer.360che.com/inquiryprice/Dealer/submitClues.aspx?relname=' + encodeURI(this.priceData.relname) + '&tel='+ this.priceData.tel +'&truckid='+ this.priceData.truckid +'&provincesn='+ this.priceData.provincesn +'&citysn='+ this.priceData.citysn +'&townsn=&buycount='+ this.priceData.buycount +'&shopstr=' + this.priceData.shopstr + '&clueresource=' + this.priceData.clueresource;
+                        let ajaxUrl = 'https://dealer-api.360che.com/inquiryprice/Dealer/submitClues.aspx?relname=' + encodeURI(this.priceData.relname) + '&tel='+ this.priceData.tel +'&truckid='+ this.priceData.truckid +'&provincesn='+ this.priceData.provincesn +'&citysn='+ this.priceData.citysn +'&townsn=&buycount='+ this.priceData.buycount +'&shopstr=' + this.priceData.shopstr + '&clueresource=' + this.priceData.clueresource;
                         this.getData(ajaxUrl,(ele) => {
                             if(ele.ok){
                                 //存储询底价数据
@@ -333,7 +333,7 @@
         flex-direction: row;
     }
     .change-icon{
-        margin-right: 10px;  
+        margin-right: 10px;
         vertical-align: middle;
     }
     .change-text{
@@ -349,7 +349,7 @@
         position: relative;
         border-bottom: solid;
         border-bottom-color: #eee;
-        border-bottom-width: 2px; 
+        border-bottom-width: 2px;
     }
     .skip{
         flex: 1;

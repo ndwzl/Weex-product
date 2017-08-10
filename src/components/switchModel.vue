@@ -31,11 +31,11 @@
                         <text class="sell-type">{{res.F_IsStopMake == 1 ? '' : res.F_IsStopMake == 4 ? '停售' : '未上市'}}</text>
                     </div>
                 </div>
+                <div class="empty" v-if="!ele.list.length">
+                    <image src="https://s.kcimg.cn/wap/images/app_icon/bad.png" style="width:155px;height:100px;"></image>
+                    <text class="empty-text">很遗憾~ 没有相关内容~</text>
+                </div>
                 <!--v-if="switchModelData.attrList[index].length"-->
-            </div>
-            <div class="empty" v-if="!switchModelData.priceList || !switchModelData.priceList.length">
-                <image src="https://s.kcimg.cn/wap/images/app_icon/bad.png" style="width:155px;height:100px;"></image>
-                <text class="empty-text">很遗憾~ 没有相关内容~</text>
             </div>
 
         </scroller>
