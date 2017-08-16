@@ -2,9 +2,11 @@
     <div :class="['dealer',!footerInfo.footerPrice? 'no-padding' : '']">
         <div v-if="iosTop" class="ios-top"></div>
         <list style="flex: 1">
-            <cell>
+            <header>
                 <!--标题-->
                 <title :titleName="titleName"></title>
+            </header>
+            <cell>
                 <!--经销商-->
                 <dealer :locationInfo="locationInfo" :dealerData="dealerData" @selectLocationPop="selectLocationPop" :el="el" isProduct="true"></dealer>
             </cell>

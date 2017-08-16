@@ -1,8 +1,10 @@
 <template>
     <div class="container">
         <list class="list">
-            <cell>
+            <header>
                 <nav-bar @historyShow="historyShow"></nav-bar>
+            </header>
+            <cell>
                 <recommend-list :recommendList="recommendList" @SidebarShow="SidebarShow" v-if="!errorButton"></recommend-list>
             </cell>
             <cell v-for="(brandListInfo,index) in brandList" :ref="indexNav[index]">

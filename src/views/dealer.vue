@@ -2,9 +2,11 @@
     <div class="series-dealer">
         <div v-if="iosTop" class="ios-top"></div>
         <list style="flex: 1">
-            <cell>
+            <header>
                 <!--标题-->
                 <title :titleName="titleName"></title>
+            </header>
+            <cell>
                 <!--经销商-->
                 <dealer :seriesId="seriesInfo.F_SeriesId" :locationInfo="locationInfo" :dealerData="dealerData" @selectLocationPop="selectLocationPop" all="1" :el="el"></dealer>
             </cell>

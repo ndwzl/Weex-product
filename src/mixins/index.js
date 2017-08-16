@@ -71,11 +71,11 @@ export default {
                 }
             })
 
-            // this.getData("http://192.168.250.178:8080/dist/" + url,ele => {
+            // this.getData("http://192.168.1.63:8080//dist/" + url,ele => {
             //   // this.alert(JSON.stringify(ele))
             //    if(ele.statusText == 'OK'){
             //        navigator.push({
-            //            url: "http://192.168.250.178:8080/dist/" + url,
+            //            url: "http://192.168.1.63:8080//dist/" + url,
             //            animated: 'true'
             //        },() => {
             //            //隐藏加载loading

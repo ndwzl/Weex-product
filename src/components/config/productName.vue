@@ -94,6 +94,7 @@
         /*border-top-width:20px;*/
         /*border-top-style:solid;*/
         /*border-top-color:#f5f5f5;*/
+        background-color:#fff;
     }
     .caption{
         width: 180px;

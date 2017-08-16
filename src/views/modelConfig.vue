@@ -2,18 +2,14 @@
     <div :class="['config',!footerInfo.footerPrice? 'no-padding' : '']">
         <div v-if="iosTop" class="ios-top"></div>
         <list style="flex: 1" @scroll="sticky">
-            <cell class="title-wrapper">
+            <cell>
                 <!--标题-->
                 <title :titleName="titleName"></title>
-                <!--对比车型名称-->
-                <div class="product-name-wrapper">
-                    <product-name :products="configData.products" :compareNumber="compareNumber"  @clear="clear" @goAddSeries="addSeriesPop"></product-name>
-                </div>
-                <div v-if="floatTitle && !addSeriesShow" class="float-title">
-                    <div v-if="iosTop" class="ios-top"></div>
-                    <product-name :products="configData.products" :compareNumber="compareNumber"  @clear="clear" @goAddSeries="addSeriesPop"></product-name>
-                </div>
             </cell>
+            <header>
+                <!--对比车型名称-->
+                <product-name :products="configData.products" :compareNumber="compareNumber"  @clear="clear" @goAddSeries="addSeriesPop"></product-name>
+            </header>
             <!--对比车型选项-->
             <cell class="model" ref="车型信息">
                 <div class="title">
@@ -115,8 +111,6 @@
                 titleName:'',
                 //车系信息 子类id && 车系id && 品牌id
                 seriesInfo:{},
-                //是否显示浮层title
-                floatTitle:false,
                 //对比的数量
                 compareNumber:'',
                 //配置数据
@@ -237,10 +231,11 @@
                             //低价和厂商报价
                             this.configData.lowPrice.push(ele.data.lowPrice);
 
-                            //对比的数量
-                            this.compareNumber = this.configData.paramList.length,
                             //对比信息
                             this.configData.paramList.push(ele.data.paramList)
+
+                            //对比的数量
+                            this.compareNumber = this.configData.paramList.length;
 
                             //赋值对比数据
                             storage.getItem('compareData',compareData => {
@@ -350,18 +345,6 @@
                 if(this.classifyPop){
                     this.classifyPop = false;
                 }
-
-                //标题吸顶
-                if(event.contentOffset.y < -110){
-                    if(!this.floatTitle){
-                        this.floatTitle = true;
-                    }
-//                    event.contentOffset.y = 0;
-                }else{
-                    if(this.floatTitle){
-                        this.floatTitle = false;
-                    }
-                }
             },
             //显示选择车系列表弹层 || 隐藏选择车系列表弹层
             addSeriesPop(){
@@ -379,7 +362,6 @@
             },
             //选择车型
             selectModel(ele){
-                console.log(ele)
 
                 //查看对比缓存
                 storage.getItem('compareData',compareData => {
@@ -398,7 +380,6 @@
                                         proId = ele.F_ProductId + '_' + data[this.seriesInfo.F_SubCategoryId][0];
                                         data[this.seriesInfo.F_SubCategoryId].unshift(ele.F_ProductId)
                                     }
-                                    console.log(data[this.seriesInfo.F_SubCategoryId])
                                 }else{
                                     proId = ele.F_ProductId
                                     data[this.seriesInfo.F_SubCategoryId].push(ele.F_ProductId)
@@ -419,7 +400,7 @@
                                                 })
 
                                                 //对比的数量
-                                                this.compareNumber = roductInfo.data.data.length;
+                                                this.compareNumber = productInfo.data.data.length;
 
                                                 //增加对比pv
                                                 if(productInfo.data.data.length == 2){
@@ -638,18 +619,5 @@
         border-top-right-radius:4px;
         border-bottom-left-radius:4px;
         border-bottom-right-radius:4px;
-    }
-    .title-wrapper{
-        background-color: #f5f5f5;
-    }
-    .product-name-wrapper{
-        margin-top: 20px;
-        background-color: #fff;
-    }
-    .float-title{
-        position: fixed;
-        left:0;
-        top:0;
-        background-color: #fff;
     }
 </style>

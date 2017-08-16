@@ -1,18 +1,20 @@
 <template>
 
-    <div class="location">
+    <div class="['location',iosTop ? 'noPadding' : '']">
             <div v-if="iosTop" class="ios-top"></div>
             <list class="location-wrapper"><!-- @scroll="scrollContent" ref="locationWrapper"-->
                 <!--头部-->
-                <cell class="title">
-                    <div class="back" @click="selectLocationPop">
-                        <!--<text :style="{fontFamily:'detail',fontSize:'32px',color:'#333'}">回</text>-->
-                        <image src="https://s.kcimg.cn/wap/images/detail/productApp/back.png" style="width:20px;height:36px"></image>
+                <header>
+                    <div class="title">
+                        <div class="back" @click="selectLocationPop">
+                            <!--<text :style="{fontFamily:'detail',fontSize:'32px',color:'#333'}">回</text>-->
+                            <image src="https://s.kcimg.cn/wap/images/detail/productApp/back.png" style="width:20px;height:36px"></image>
+                        </div>
+                        <div class="wrapper">
+                            <text class="title-name">选择地区</text>
+                        </div>
                     </div>
-                    <div class="wrapper">
-                        <text class="title-name">选择地区</text>
-                    </div>
-                </cell>
+                </header>
 
                 <!--地区搜索-->
                 <cell :class="['search-location',searching?'searching':'']">
@@ -70,26 +72,29 @@
                 </div>
             </div>
             <!--侧边栏内容-->
-            <list class="sidebar-content" style="flex: 1" ref="side">
-                <cell v-if="iosTop" class="ios-top"></cell>
-                <cell class="sidebar-header" v-if="showSidebar">
-                    <div class="back" @click="sidebarHide">
-                        <text class="back-text">关闭</text>
-                    </div>
-                    <text class="sidebar-header-text">{{locationInfo.provinceName}}</text>
-                </cell>
-                <cell v-if="sidebarContent.length > 0" v-for="(data,index) in sidebarContent" class="sidebar-module" @click="selectCity(data.F_CityName,data.F_Id)">
-                    <div class="city-name">
-                        <text :class="['city-name-text',locationInfo.cityName==data.F_CityName?'city-name-text-visible':'']">{{data.F_CityName}}</text>
-                    </div>
-                </cell>
-                <cell v-if="sidebarContent.length == 0" class="empty-history">
-                    <!--<text :style="{fontFamily:'detail',fontSize:'100px',color:'#a1c6f5'}">&#x65e0;</text>-->
-                    <image src="https://s.kcimg.cn/wap/images/app_icon/bad.png" style="width:155px;height:100px;"></image>
-                    <text class="empty-history-text">很遗憾~ 没有相关内容~</text>
-                </cell>
-            </list>
-        </div>
+            <div class="['sidebar-content',iosTop ? 'noPadding' : '']" ref="side">
+                <div class="ios-top" v-if="iosTop"></div>
+                <list style="flex: 1">
+                     <cell class="sidebar-header" v-if="showSidebar">
+                        <div class="back" @click="sidebarHide">
+                            <text class="back-text">关闭</text>
+                        </div>
+                        <text class="sidebar-header-text">{{locationInfo.provinceName}}</text>
+                    </cell>
+                    <cell v-if="sidebarContent.length > 0" v-for="(data,index) in sidebarContent" class="sidebar-module" @click="selectCity(data.F_CityName,data.F_Id)">
+                        <div class="city-name">
+                            <text :class="['city-name-text',locationInfo.cityName==data.F_CityName?'city-name-text-visible':'']">{{data.F_CityName}}</text>
+                        </div>
+                    </cell>
+                    <cell v-if="sidebarContent.length == 0" class="empty-history">
+                        <!--<text :style="{fontFamily:'detail',fontSize:'100px',color:'#a1c6f5'}">&#x65e0;</text>-->
+                        <image src="https://s.kcimg.cn/wap/images/app_icon/bad.png" style="width:155px;height:100px;"></image>
+                        <text class="empty-history-text">很遗憾~ 没有相关内容~</text>
+                    </cell>
+                </list>
+
+            </div>
+    </div>
 </template>
 
 <script type="text/babel">
@@ -345,7 +350,11 @@
         right:0;
         bottom:-100px;
         left:0;
+        /*flex: 1;*/
         background-color:#fff;
+    }
+    .noPadding{
+        bottom:0;
     }
     .ios-top{
         height:40px;
@@ -595,11 +604,13 @@
         width:600px;
         top: 0;
         right: 0;
-        bottom: 0;
+        bottom: -100px;
         left: 150px;
         transform: translate(750px,0);
         background-color: #fff;
-        /*box-shadow: -2px 2px 2px 2px #d6d6d6;*/
+        border-left-color: rgba(0,0,0,.1);
+        border-left-width: 4px;
+        border-left-style:solid;
     }
 
     .back {

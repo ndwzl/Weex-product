@@ -2,8 +2,10 @@
     <div  class="model">
         <div v-if="iosTop" class="ios-top"></div>
         <list style="flex: 1">
-            <cell ref="goTop">
+            <header ref="goTop">
                 <title :titleName="titleName" :shareData="shareData" :ProductId="ProductId"></title>
+            </header>
+            <cell>
                 <nav :navList="navList"></nav>
                 <truck-image :truckImageData="truckImageData" url="modelPhoto.weex.js"></truck-image>
                 <div class="model-info">
@@ -362,7 +364,10 @@
             examineSimilar(){
                 let examine = this.$refs['examine'];
                 dom.scrollToElement(examine, {offset: 0})
-                dom.scrollToElement(this.$refs['examine'][0], {offset: 0})
+                // dom.scrollToElement(this.$refs['examine'][0], {offset: 0})
+                this.examineSimliarData.content.forEach((ele,index) => {
+                    ele.show = true;
+                })
 
             },
             //换车型弹框
@@ -883,7 +888,7 @@
     .examine-similar{
         position:absolute;
         right:30px;
-        bottom:14px;
+        bottom:4px;
         color:#586C94;
         font-size:28px;
         text-decoration: underline;

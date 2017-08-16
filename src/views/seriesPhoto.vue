@@ -3,28 +3,32 @@
         <div v-if="iosTop" class="ios-top"></div>
         <!--标题-->
         <title :titleName="titleName" v-if="notImg"></title>
-        <scroller style="flex: 1;" @loadmore="fetch" loadmoreoffset="10" v-if="!notImg">
+        <list style="flex: 1;" @loadmore="fetch" loadmoreoffset="100" v-if="!notImg" ref="list">
             <!--标题-->
-            <title :titleName="titleName"></title>
-            <!--车型名字和换车型-->
-            <div class="model-name" v-if="!notImg">
-                <!--<div @click="fetch">-->
-                    <!--<tetx>加载</tetx>-->
-                    <!--<tetx>加载</tetx>-->
-                    <!--<tetx>加载</tetx>-->
-                <!--</div>-->
-                <text class="model-name-text">{{proName}}</text>
-                <div class="switch-model-button" @click="switchModelShow">
-                    <text class="switch-model-text">换车型</text>
-                    <image src="https://s.kcimg.cn/wap/images/detail/productApp/go-blue.png" style="width:14px;height:24px;margin-left:10px"></image>
-                    <!--<text :style="{fontFamily:'detail',fontSize:'24px',color:'#586C94'}">&#x53bb;</text>-->
+            <header>
+                <title :titleName="titleName"></title>
+            </header>
+            <cell>
+                <!--车型名字和换车型-->
+                <div class="model-name" v-if="!notImg">
+                    <!--<div @click="fetch">-->
+                        <!--<tetx>加载</tetx>-->
+                        <!--<tetx>加载</tetx>-->
+                        <!--<tetx>加载</tetx>-->
+                    <!--</div>-->
+                    <text class="model-name-text">{{proName}}</text>
+                    <div class="switch-model-button" @click="switchModelShow">
+                        <text class="switch-model-text">换车型</text>
+                        <image src="https://s.kcimg.cn/wap/images/detail/productApp/go-blue.png" style="width:14px;height:24px;margin-left:10px"></image>
+                        <!--<text :style="{fontFamily:'detail',fontSize:'24px',color:'#586C94'}">&#x53bb;</text>-->
+                    </div>
                 </div>
-            </div>
-            <!--内容-->
-            <photo-album :photoData="photoData" v-if="photoData.options.length" :ProductId="this.ProductId" @detailed="detailed"></photo-album>
-            <!--loading状态-->
-            <load v-if="loadingShow"></load>
-        </scroller>
+                <!--内容-->
+                <photo-album :photoData="photoData" v-if="photoData.options.length" :ProductId="this.ProductId" @detailed="detailed"></photo-album>
+                <!--loading状态-->
+                <load v-if="loadingShow"></load>
+            </cell>
+        </list>
         <div v-else class="not-img">
             <div class="not-wrapper">
                 <image src="https://s.kcimg.cn/wap/images/detail/productApp/not-img.png" style="width:268px;height:194px;"></image>
@@ -52,6 +56,7 @@
     let storage = weex.requireModule('storage');
     let modal = weex.requireModule('modal')
     let globalEvent = weex.requireModule('globalEvent');
+    let scrollToElement = weex.requireModule('scrollToElement');
     export default {
         data(){
             return {
@@ -287,9 +292,13 @@
             },
             //滚动加载更多图片
             fetch(){
-                //loading状态显示
-                this.loadingShow = true;
+                let el = this.$refs['list'];
+                el.resetLoadmore();
+                if(this.photoData.typeId == 0) return ;
+
                 if(this.loadimg){
+                    //loading状态显示
+                    this.loadingShow = true;
                     this.loadimg = false;
                     this.getData(this.ajaxUrl() + '/index.php?r=m/ajax/series/ajaxgetseriesimgmore&ajaxurl=%2Findex.php%3Fr%3Dm%2Fajax%2Fseries%2Fajaxgetseriesimgmore&seriesid=' + this.seriesInfo.F_SeriesId + '&subcateid=' + this.seriesInfo.F_SubCategoryId + '&typeid=' + this.photoData.typeId + '&productid=' + this.ProductId + '&page=' + this.photoData.page,(ele) => {
                        if(ele.ok && ele.data.status == 1){

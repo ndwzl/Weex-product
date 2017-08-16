@@ -2,9 +2,11 @@
     <div class="series">
         <div v-if="iosTop" class="ios-top"></div>
         <list style="flex: 1">
-            <cell ref="goTop">
+            <header ref="goTop">
                 <!--标题-->
                 <title :titleName="titleName" :shareData="shareData" :seriesId="seriesInfo.F_SeriesId"></title>
+            </header>
+            <cell>
                 <!--nav导航-->
                 <nav :navList="navList" :navInfo="navInfo"></nav>
                 <!--卡车图片信息-->
@@ -505,6 +507,7 @@
     .series{
         flex: 1;
         padding-bottom:100px;
+        box-sizing: border-box;
     }
     .ios-top{
         height:40px;

@@ -3,34 +3,38 @@
         <div v-if="iosTop" class="ios-top"></div>
         <!--标题-->
         <title :titleName="titleName" v-if="notImg" ></title>
-        <scroller v-if="!notImg" style="flex: 1" @loadmore="fetch" loadmoreoffset="10">
-            <!--标题-->
-            <title :titleName="titleName"></title>
-            <!--推荐车型-->
-            <div class="recommend" v-if="isRecommend">
-                <text class="recommend-text">当前车型暂无图片，为您推荐：{{proName}} 车型图片 </text>
-                <text class="change" @click="switchModelShow">切换车型</text>
-            </div>
-            <!--<div @click="fetch">-->
-                <!--<text>加载-->
-                <!--加载-->
-                <!--加载-->
-                <!--</text>-->
-            <!--</div>-->
-            <!--车型名字和换车型-->
-            <div class="model-name" v-if="!isRecommend && !notImg">
-                <text class="model-name-text">{{proName}}</text>
-                <div class="switch-model-button" @click="switchModelShow">
-                    <text class="switch-model-text">换车型</text>
-                    <image src="https://s.kcimg.cn/wap/images/detail/productApp/go-blue.png" style="width:14px;height:24px"></image>
-                    <!--<text :style="{fontFamily:'detail',fontSize:'24px',color:'#586C94'}">&#x53bb;</text>-->
+        <list v-if="!notImg" style="flex: 1" @loadmore="fetch" loadmoreoffset="100" ref="list">
+            <header>
+                 <!--标题-->
+                <title :titleName="titleName"></title>
+            </header>
+            <cell>
+                <!--推荐车型-->
+                <div class="recommend" v-if="isRecommend">
+                    <text class="recommend-text">当前车型暂无图片，为您推荐：{{proName}} 车型图片 </text>
+                    <text class="change" @click="switchModelShow">切换车型</text>
                 </div>
-            </div>
-            <!--内容-->
-            <photo-album :photoData="photoData" v-if="photoData.options.length" :ProductId="ProductId" @detailed="detailed" :isRecommend="isRecommend"></photo-album>
-            <!--loading状态-->
-            <load v-if="loadingShow"></load>
-        </scroller>
+                <!--<div @click="fetch">-->
+                    <!--<text>加载-->
+                    <!--加载-->
+                    <!--加载-->
+                    <!--</text>-->
+                <!--</div>-->
+                <!--车型名字和换车型-->
+                <div class="model-name" v-if="!isRecommend && !notImg">
+                    <text class="model-name-text">{{proName}}</text>
+                    <div class="switch-model-button" @click="switchModelShow">
+                        <text class="switch-model-text">换车型</text>
+                        <image src="https://s.kcimg.cn/wap/images/detail/productApp/go-blue.png" style="width:14px;height:24px"></image>
+                        <!--<text :style="{fontFamily:'detail',fontSize:'24px',color:'#586C94'}">&#x53bb;</text>-->
+                    </div>
+                </div>
+                <!--内容-->
+                <photo-album :photoData="photoData" v-if="photoData.options.length" :ProductId="ProductId" @detailed="detailed" :isRecommend="isRecommend"></photo-album>
+                <!--loading状态-->
+                <load v-if="loadingShow"></load>
+            </cell>
+        </list>
         <div v-else class="not-img">
             <div>
                 <image src="https://s.kcimg.cn/wap/images/detail/productApp/not-img.png" style="width:268px;height:194px;"></image>
@@ -347,7 +351,10 @@
             },
             //滚动加载更多图片
             fetch(){
-//                this.alert(this.page)
+                let el = this.$refs['list'];
+                el.resetLoadmore();
+                if(this.photoData.typeId == 0) return ;
+                
                 if(this.loadimg) {
                     //loading状态显示
                     this.loadingShow = true;

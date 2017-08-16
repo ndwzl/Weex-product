@@ -1,44 +1,47 @@
 <template>
     <div class="switch-model" v-if="switchModelPop">
         <div v-if="iosTop" class="ios-top"></div>
-        <scroller style="flex: 1" >
-            <div class="title">
-                <div class="back" @click="switchModelShow">
-                    <!--<text :style="{fontFamily:'detail',fontSize:'32px',color:'#333'}">回</text>-->
-                    <image src="https://s.kcimg.cn/wap/images/detail/productApp/back.png" style="width:20px;height:36px"></image>
-                </div>
-                <div class="wrapper" >
-                    <text class="title-name">换车型</text>
-                </div>
-                <div v-if="all" class="all-product" @click="allProduct">
-                    <text class="all-product-text">全部车型</text>
-                </div>
-            </div>
-            <div class="options" v-if="switchModelData.attrList">
-                <div v-for="(ele,index) in switchModelData.attrList" :class="['option',selected ==  switchModelData.attrList[index] ? 'selected-option' : '']" @click="selectOption(index)">
-                    <text :class="['option-text',selected == switchModelData.attrList[index] ? 'selected-option-text' : '']">{{ele}}</text>
-                </div>
-            </div>
-            <div class="switch-model-content" v-for="(ele,index) in switchModelData.priceList" v-if="selected == switchModelData.attrList[index]">
-                <div v-for="(res,index) in ele.list" class="switch-model-list" @click="goSwitchModel(res.F_ProductId)">
-                    <!--<div class="model-name">-->
-                        <text :class="['model-name-text',res.F_ProductId == ProductId ? 'selected-model-name' : '']">{{res.specialProName}}</text>
-                    <!--</div>-->
-                    <div class="tags">
-                        <div class="tags-wrapper">
-                            <text v-for="tag in res.paramDetail" class="tag">{{tag}}</text>
-                        </div>
-                        <text class="sell-type">{{res.F_IsStopMake == 1 ? '' : res.F_IsStopMake == 4 ? '停售' : '未上市'}}</text>
+        <list style="flex: 1" >
+            <header>
+                <div class="title">
+                    <div class="back" @click="switchModelShow">
+                        <!--<text :style="{fontFamily:'detail',fontSize:'32px',color:'#333'}">回</text>-->
+                        <image src="https://s.kcimg.cn/wap/images/detail/productApp/back.png" style="width:20px;height:36px"></image>
+                    </div>
+                    <div class="wrapper" >
+                        <text class="title-name">换车型</text>
+                    </div>
+                    <div v-if="all" class="all-product" @click="allProduct">
+                        <text class="all-product-text">全部车型</text>
                     </div>
                 </div>
-                <div class="empty" v-if="!ele.list.length">
-                    <image src="https://s.kcimg.cn/wap/images/app_icon/bad.png" style="width:155px;height:100px;"></image>
-                    <text class="empty-text">很遗憾~ 没有相关内容~</text>
+            </header>
+            <cell>
+                <div class="options" v-if="switchModelData.attrList">
+                    <div v-for="(ele,index) in switchModelData.attrList" :class="['option',selected ==  switchModelData.attrList[index] ? 'selected-option' : '']" @click="selectOption(index)">
+                        <text :class="['option-text',selected == switchModelData.attrList[index] ? 'selected-option-text' : '']">{{ele}}</text>
+                    </div>
                 </div>
-                <!--v-if="switchModelData.attrList[index].length"-->
-            </div>
-
-        </scroller>
+                <div class="switch-model-content" v-for="(ele,index) in switchModelData.priceList" v-if="selected == switchModelData.attrList[index]">
+                    <div v-for="(res,index) in ele.list" class="switch-model-list" @click="goSwitchModel(res.F_ProductId)">
+                        <!--<div class="model-name">-->
+                            <text :class="['model-name-text',res.F_ProductId == ProductId ? 'selected-model-name' : '']">{{res.specialProName}}</text>
+                        <!--</div>-->
+                        <div class="tags">
+                            <div class="tags-wrapper">
+                                <text v-for="tag in res.paramDetail" class="tag">{{tag}}</text>
+                            </div>
+                            <text class="sell-type">{{res.F_IsStopMake == 1 ? '' : res.F_IsStopMake == 4 ? '停售' : '未上市'}}</text>
+                        </div>
+                    </div>
+                    <div class="empty" v-if="!ele.list.length">
+                        <image src="https://s.kcimg.cn/wap/images/app_icon/bad.png" style="width:155px;height:100px;"></image>
+                        <text class="empty-text">很遗憾~ 没有相关内容~</text>
+                    </div>
+                    <!--v-if="switchModelData.attrList[index].length"-->
+                </div>
+            </cell>
+        </list>
     </div>
 </template>
 

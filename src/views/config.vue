@@ -1,19 +1,15 @@
 <template>
     <div class="config">
         <div v-if="iosTop" class="ios-top"></div>
-        <list style="flex: 1" @scroll="sticky">
-            <cell class="title-wrapper">
+        <list style="flex:1" @scroll="sticky">
+            <cell>
                 <!--标题-->
                 <title :titleName="titleName"></title>
-                <!--对比车型名称-->
-                <div class="product-name-wrapper">
-                    <product-name :products="configData.products" :compareNumber="compareNumber" @clear="clear" @goAddSeries="addSeriesPop"></product-name>
-                </div>
-                <div v-if="floatTitle && !addSeriesShow" class="float-title">
-                    <div v-if="iosTop" class="ios-top"></div>
-                    <product-name :products="configData.products" :compareNumber="compareNumber" @clear="clear" @goAddSeries="addSeriesPop"></product-name>
-                </div>
             </cell>
+            <header>
+                <!--对比车型名称-->
+                <product-name :products="configData.products" :compareNumber="compareNumber" @clear="clear" @goAddSeries="addSeriesPop"></product-name>
+            </header>
             <!--对比车型选项-->
             <cell class="model" ref="车型信息">
                 <div class="title">
@@ -120,8 +116,6 @@
                 seriesInfo:{},
                 //对比的数量
                 compareNumber:'',
-                //是否显示浮层title
-                floatTitle:false,
                 //配置数据
                 configData:{
                     //对比车型
@@ -403,18 +397,6 @@
                 if(this.classifyPop){
                     this.classifyPop = false;
                 }
-
-                //标题吸顶
-                if(event.contentOffset.y < -110){
-                    if(!this.floatTitle){
-                        this.floatTitle = true;
-                    }
-//                    event.contentOffset.y = 0;
-                }else{
-                    if(this.floatTitle){
-                        this.floatTitle = false;
-                    }
-                }
             },
             //显示选择车系列表弹层 || 隐藏选择车系列表弹层
             addSeriesPop(){
@@ -496,7 +478,6 @@
                                                         }
                                                     })
                                                 }
-
 
                                                 //存储对比记录
                                                 storage.getItem('compare_history',history => {
@@ -700,18 +681,5 @@
         border-top-right-radius:4px;
         border-bottom-left-radius:4px;
         border-bottom-right-radius:4px;
-    }
-    .title-wrapper{
-        background-color: #f5f5f5;
-    }
-    .product-name-wrapper{
-        margin-top: 20px;
-        background-color: #fff;
-    }
-    .float-title{
-        position: fixed;
-        left:0;
-        top:0;
-        background-color: #fff;
     }
 </style>
