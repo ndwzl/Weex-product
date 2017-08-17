@@ -2,16 +2,16 @@
 	<div class="add-series" ref="addSeries">
 		<div v-if="iosTop" class="ios-top"></div>
 		<list style="flex: 1;background-color: #f5f5f5;">
-			<cell class="product-title">
-				<div class="product-back" @click="addSeriesPop">
-					<!--<text :style="{fontFamily:'detail',fontSize:'32px',color:'#333'}">回</text>-->
-					<image src="https://s.kcimg.cn/wap/images/detail/productApp/back.png" style="width:20px;height:36px"></image>
+			<header>
+				<div class="product-title">
+					<div class="product-back" @click="addSeriesPop">
+						<!--<text :style="{fontFamily:'detail',fontSize:'32px',color:'#333'}">回</text>-->
+						<image src="https://s.kcimg.cn/wap/images/detail/productApp/back.png" style="width:20px;height:36px"></image>
+					</div>
+					<div class="product-wrapper">
+						<text class="title-name">{{titleName}}</text>
+					</div>
 				</div>
-				<div class="product-wrapper">
-					<text class="title-name">{{titleName}}</text>
-				</div>
-			</cell>
-			<cell>
 				<!-- 导航 -->
 				<div class="nav">
 					<!-- 热门 -->
@@ -27,6 +27,9 @@
 						<text :class="['nav-text',selected === 2 ? 'current' : '']">对比记录</text>
 					</div>
 				</div>
+			</header>
+			<cell>
+
 			</cell>
 
 			<!-- 热门列表 -->
@@ -169,13 +172,15 @@
 			<!--内容-->
 			<list class="sidebar-content" style="flex: 1" ref="side">
 				<cell v-if="iosTop" class="ios-top"></cell>
-				<cell class="sidebar-header" v-if="showSidebar">
-					<div class="back" @click="sidebarHide">
-						<image src="https://s.kcimg.cn/wap/images/app_icon/back.png" style="width:40px;height:40px"></image>
-						<!--<text class="back-text" :style="{fontFamily:'detail'}">&#x56de;</text>-->
+				<header>
+					<div class="sidebar-header" v-if="showSidebar">
+						<div class="back" @click="sidebarHide">
+							<image src="https://s.kcimg.cn/wap/images/app_icon/back.png" style="width:40px;height:40px"></image>
+							<!--<text class="back-text" :style="{fontFamily:'detail'}">&#x56de;</text>-->
+						</div>
+						<text class="sidebar-header-text">选择车系</text>
 					</div>
-					<text class="sidebar-header-text">选择车系</text>
-				</cell>
+				</header>
 				<cell class="sidebar-module">
 					<div class="sidebar-list" v-for="(item,index) in sidebarList" @click="goSelectProduct(item)">
 						<text class="sidebar-list-name">{{item.seriesName}}</text>

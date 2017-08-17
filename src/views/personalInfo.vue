@@ -2,8 +2,10 @@
     <div class="information">
         <div v-if="iosTop" class="ios-top"></div>
         <list style="flex: 1">
-            <cell>
+            <header>
                 <title titleName="个人信息保护声明"></title>
+            </header>
+            <cell>
                 <div class="personal-information">
                     <text class="title">1、用户须知</text>
                     <div class="content">

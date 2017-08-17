@@ -2,12 +2,10 @@
     <div class="contrast">
         <div v-if="iosTop" class="ios-top"></div>
         <list style="flex: 1" @scroll="sticky">
-            <cell>
+            <header>
                 <!--标题-->
                 <title titleName="车型对比"></title>
                 <!--对比车型名称-->
-            </cell>
-            <header>
                 <product-name :products="configData.products" @clear="clear" :compareNumber="compareNumber"  footerPrice="true" @goAddSeries="addSeriesPop"></product-name>
             </header>
             <!--对比车型选项-->

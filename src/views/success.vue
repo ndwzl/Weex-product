@@ -2,52 +2,58 @@
     <!-- 询价成功 -->
     <div class="success-page">
         <div v-if="iosTop" class="ios-top"></div>
-        <!-- 标题 -->
-        <title :titleName="titleName"></title>
-        <!-- 询价成功提示 -->
-        <div class="success">
-            <div class="success-module">
-                <div class="success-icon">
-                    <!--<text :style="{fontFamily:'detail',fontSize:'60px',color:'#f60'}" class="mark">勾</text>-->
-                    <image src="https://s.kcimg.cn/wap/images/detail/productApp/mark.png" style="width:64px;height:64px"></image>
-                </div>
-                <div class="success-text">
-                    <text class="prosit">恭喜您, 询价成功~</text>
-                    <text class="relation">稍后会有经销商与您联系</text>
-                </div>
-            </div>
-        </div>
-        <!-- 推荐列表 -->
-        <div class="recommend">
-            <div class="head" v-if="restsAttention.length > 0">
-                <text class="attention">询问此车型的人还在关注</text>
-                <div class="change" @click="exchange">
-                    <!--<text :style="{fontFamily:'detail',fontSize:'20px',color:'#f60'}" class="change-icon">刷</text>-->
-                    <image src="https://s.kcimg.cn/wap/images/detail/productApp/switch-model-f60.png" style="width:38px;height: 32px"></image>
-                    <text class="change-text">换一批</text>
-                </div>
-            </div>
-            <div class="recommend-list" v-if="restsAttention.length > 0">
-                <div class="car-content" v-for="(ele,index) in restsAttention[index]">
-                    <image class="car-icon" :src="ele.img"></image>
-                    <div class="detail">
-                        <div class="car-info">
-                            <text class="car-text">{{ele.F_ProductName}}</text>
+        <list style="flex:1">
+            <header>
+                <!-- 标题 -->
+                <title :titleName="titleName"></title>
+            </header>
+            <cell>
+                <!-- 询价成功提示 -->
+                <div class="success">
+                    <div class="success-module">
+                        <div class="success-icon">
+                            <!--<text :style="{fontFamily:'detail',fontSize:'60px',color:'#f60'}" class="mark">勾</text>-->
+                            <image src="https://s.kcimg.cn/wap/images/detail/productApp/mark.png" style="width:64px;height:64px"></image>
                         </div>
-                        <div class="footer">
-                            <div class="number">
-                                <text class="man"> {{ele.F_WeekClickCount}}人</text>
-                                <text class="ask">成功询价</text>
+                        <div class="success-text">
+                            <text class="prosit">恭喜您, 询价成功~</text>
+                            <text class="relation">稍后会有经销商与您联系</text>
+                        </div>
+                    </div>
+                </div>
+                <!-- 推荐列表 -->
+                <div class="recommend">
+                    <div class="head" v-if="restsAttention.length > 0">
+                        <text class="attention">询问此车型的人还在关注</text>
+                        <div class="change" @click="exchange">
+                            <!--<text :style="{fontFamily:'detail',fontSize:'20px',color:'#f60'}" class="change-icon">刷</text>-->
+                            <image src="https://s.kcimg.cn/wap/images/detail/productApp/switch-model-f60.png" style="width:38px;height: 32px"></image>
+                            <text class="change-text">换一批</text>
+                        </div>
+                    </div>
+                    <div class="recommend-list" v-if="restsAttention.length > 0">
+                        <div class="car-content" v-for="(ele,index) in restsAttention[index]">
+                            <image class="car-icon" :src="ele.img"></image>
+                            <div class="detail">
+                                <div class="car-info">
+                                    <text class="car-text">{{ele.F_ProductName}}</text>
+                                </div>
+                                <div class="footer">
+                                    <div class="number">
+                                        <text class="man"> {{ele.F_WeekClickCount}}人</text>
+                                        <text class="ask">成功询价</text>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- 一键询价 -->
+                            <div :class="['quick',ele.text ? 'quick-selected' : '']" @click="speedyPrice(ele,index)">
+                                <text :class="['ask-btn',ele.text ? 'ask-btn-selected' : '']">{{ele.text ? '询价成功' : '一键询价'}}</text>
                             </div>
                         </div>
                     </div>
-                    <!-- 一键询价 -->
-                    <div :class="['quick',ele.text ? 'quick-selected' : '']" @click="speedyPrice(ele,index)">
-                        <text :class="['ask-btn',ele.text ? 'ask-btn-selected' : '']">{{ele.text ? '询价成功' : '一键询价'}}</text>
-                    </div>
                 </div>
-            </div>
-        </div>
+            </cell>
+        </list>
     </div>
 </template>
 

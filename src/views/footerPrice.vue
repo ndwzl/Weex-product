@@ -1,84 +1,88 @@
 <template>
     <div class="enquire">
         <div v-if="iosTop" class="ios-top"></div>
-        <scroller style="flex: 1" show-scrollbar="true" >
-            <!-- 头部标题 -->
-            <title titleName="询底价"></title>
-            <!-- 车型 -->
-            <sales-model :productInfo="productInfo" :footerPriceNum="footerPriceNum" @switchModelShow="switchModelShow"></sales-model>
-            <!-- 个人信息 -->
-            <div class="message">
-                <div class="name-area">
-                    <input type="text" placeholder="请填写您的姓名(1-6个汉字)" class="name" maxlength="6" @focus="focusText('name')" value="" @change="inputChange('name',$event.value)" @input="importText('name',$event.value)" value="" @blur="blurText('name')" :class="[nameFocus?'input-focus':'']" />
-                    <div class="icon">
-                        <text class="icon-text">*</text>
+        <list style="flex: 1" show-scrollbar="true" >
+            <header>
+                <!-- 头部标题 -->
+                <title titleName="询底价"></title>
+            </header>
+            <cell>
+                <!-- 车型 -->
+                <sales-model :productInfo="productInfo" :footerPriceNum="footerPriceNum" @switchModelShow="switchModelShow"></sales-model>
+                <!-- 个人信息 -->
+                <div class="message">
+                    <div class="name-area">
+                        <input type="text" placeholder="请填写您的姓名(1-6个汉字)" class="name" maxlength="6" @focus="focusText('name')" value="" @change="inputChange('name',$event.value)" @input="importText('name',$event.value)" value="" @blur="blurText('name')" :class="[nameFocus?'input-focus':'']" />
+                        <div class="icon">
+                            <text class="icon-text">*</text>
+                        </div>
+                    </div>
+                    <div class="phone-area">
+                        <input type="tel" placeholder="请填写手机号获取底价" class="phone" @focus="focusText('phone')" value="" @change="inputChange('phone',$event.value)" @input="importText('phone',$event.value)" value="" @blur="blurText('phone')" maxlength="11" :class="[phoneFocus?'input-focus':'']" />
+                        <div class="icon">
+                            <text class="icon-text">*</text>
+                        </div>
                     </div>
                 </div>
-                <div class="phone-area">
-                    <input type="tel" placeholder="请填写手机号获取底价" class="phone" @focus="focusText('phone')" value="" @change="inputChange('phone',$event.value)" @input="importText('phone',$event.value)" value="" @blur="blurText('phone')" maxlength="11" :class="[phoneFocus?'input-focus':'']" />
-                    <div class="icon">
-                        <text class="icon-text">*</text>
+                <!-- 提车地区 -->
+                <div class="area" @click="areaPop">
+                    <div class="caption">
+                        <text class="caption-icon">*</text>
+                        <text class="caption-text">提车地区</text>
+                    </div>
+                    <div class="area-show">
+                        <div class="province">
+                            <text class="province-text" v-if="locationInfo.provinceName">{{locationInfo.provinceName}}</text>
+                        </div>
+                        <div class="city">
+                            <text class="city-text" v-if="locationInfo.cityName">{{locationInfo.cityName}}</text>
+                        </div>
+                    </div>
+                    <div class="go-area">
+                        <image src="https://s.kcimg.cn/wap/images/detail/productApp/footer-go.png" style="width:16px;height:28px;"></image>
+                        <!--<text :style="{fontFamily:'detail',fontSize:'32px',color:'#999'}" class="area-icon">去</text>-->
                     </div>
                 </div>
-            </div>
-            <!-- 提车地区 -->
-            <div class="area" @click="areaPop">
-                <div class="caption">
-                    <text class="caption-icon">*</text>
-                    <text class="caption-text">提车地区</text>
-                </div>
-                <div class="area-show">
-                    <div class="province">
-                        <text class="province-text" v-if="locationInfo.provinceName">{{locationInfo.provinceName}}</text>
+                <!-- 购买数量 -->
+                <div class="buy-number">
+                    <div class="buy">
+                        <text class="buy-text">购买数量</text>
                     </div>
-                    <div class="city">
-                        <text class="city-text" v-if="locationInfo.cityName">{{locationInfo.cityName}}</text>
-                    </div>
-                </div>
-                <div class="go-area">
-                    <image src="https://s.kcimg.cn/wap/images/detail/productApp/footer-go.png" style="width:16px;height:28px;"></image>
-                    <!--<text :style="{fontFamily:'detail',fontSize:'32px',color:'#999'}" class="area-icon">去</text>-->
-                </div>
-            </div>
-            <!-- 购买数量 -->
-            <div class="buy-number">
-                <div class="buy">
-                    <text class="buy-text">购买数量</text>
-                </div>
-                <div class="number-wrap">
-                    <div class="subtract" @click="subtractBtn">
-                        <!--<text :style="{fontFamily:'detail',fontSize:'28px'}" class="subtract-icon" :class="[priceData.buycount==1 ? 'disable' : '']">减</text>-->
-                        <image src="https://s.kcimg.cn/wap/images/detail/productApp/minus.png" style="width:30px;height:30px;"></image>
-                    </div>
-                    <div class="quantity">
-                        <text class="quantity-num">{{priceData.buycount}}</text>
-                    </div>
-                    <div class="add" @click="addBtn">
-                        <!--<text :style="{fontFamily:'detail',fontSize:'28px'}" class="add-icon" :class="[priceData.buycount==99 ? 'disable' : '']">加</text>-->
-                        <image src="https://s.kcimg.cn/wap/images/detail/productApp/plus.png" style="width:30px;height:30px;"></image>
+                    <div class="number-wrap">
+                        <div class="subtract" @click="subtractBtn">
+                            <!--<text :style="{fontFamily:'detail',fontSize:'28px'}" class="subtract-icon" :class="[priceData.buycount==1 ? 'disable' : '']">减</text>-->
+                            <image src="https://s.kcimg.cn/wap/images/detail/productApp/minus.png" style="width:30px;height:30px;"></image>
+                        </div>
+                        <div class="quantity">
+                            <text class="quantity-num">{{priceData.buycount}}</text>
+                        </div>
+                        <div class="add" @click="addBtn">
+                            <!--<text :style="{fontFamily:'detail',fontSize:'28px'}" class="add-icon" :class="[priceData.buycount==99 ? 'disable' : '']">加</text>-->
+                            <image src="https://s.kcimg.cn/wap/images/detail/productApp/plus.png" style="width:30px;height:30px;"></image>
+                        </div>
                     </div>
                 </div>
-            </div>
-            <!-- 推荐经销商 -->
-            <dealer :dealerData="dealerData" :dealerSelected="dealerSelected" :notDealer="notDealer" @selectDealer="selectDealer"></dealer>
-            <!-- 个人声明 -->
-            <div class="personal">
-                <div class="check" @click="selectStatement">
-                    <image v-if="statement" src="https://s.kcimg.cn/wap/images/detail/productApp/radius.png" style="width:35px;height:35px;"></image>
-                    <text v-else class="check-icon"></text>
+                <!-- 推荐经销商 -->
+                <dealer :dealerData="dealerData" :dealerSelected="dealerSelected" :notDealer="notDealer" @selectDealer="selectDealer"></dealer>
+                <!-- 个人声明 -->
+                <div class="personal">
+                    <div class="check" @click="selectStatement">
+                        <image v-if="statement" src="https://s.kcimg.cn/wap/images/detail/productApp/radius.png" style="width:35px;height:35px;"></image>
+                        <text v-else class="check-icon"></text>
+                    </div>
+                    <div class="agree">
+                        <text class="agree-text">我同意</text>
+                    </div>
+                    <div class="individual">
+                        <text class="protect" @click="goWeexUrl('PersonalInfo.weex.js')">《个人信息保护声明》</text>
+                    </div>
                 </div>
-                <div class="agree">
-                    <text class="agree-text">我同意</text>
+                <!-- 最终提交询底价 -->
+                <div class="submit" @click="commitData">
+                    <text class="submit-btn">免费获取最低价</text>
                 </div>
-                <div class="individual">
-                    <text class="protect" @click="goWeexUrl('PersonalInfo.weex.js')">《个人信息保护声明》</text>
-                </div>
-            </div>
-            <!-- 最终提交询底价 -->
-            <div class="submit" @click="commitData">
-                <text class="submit-btn">免费获取最低价</text>
-            </div>
-        </scroller>
+            </cell>
+        </list>
         <!-- 手机号 姓名 选择地区 错误提示 -->
         <prompt v-if="promptShow" :promptText="promptText" @closeBtn="closeBtn"></prompt>
         <!-- 选择地区 -->

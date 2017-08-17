@@ -15,13 +15,13 @@
                         <text class="all-product-text">全部车型</text>
                     </div>
                 </div>
-            </header>
-            <cell>
                 <div class="options" v-if="switchModelData.attrList">
                     <div v-for="(ele,index) in switchModelData.attrList" :class="['option',selected ==  switchModelData.attrList[index] ? 'selected-option' : '']" @click="selectOption(index)">
                         <text :class="['option-text',selected == switchModelData.attrList[index] ? 'selected-option-text' : '']">{{ele}}</text>
                     </div>
                 </div>
+            </header>
+            <cell>
                 <div class="switch-model-content" v-for="(ele,index) in switchModelData.priceList" v-if="selected == switchModelData.attrList[index]">
                     <div v-for="(res,index) in ele.list" class="switch-model-list" @click="goSwitchModel(res.F_ProductId)">
                         <!--<div class="model-name">-->
@@ -214,6 +214,7 @@
         padding-left:10px;
         flex-direction:row;
         flex-wrap:wrap;
+        background-color:#fff;
     }
     .option{
         width:223px;

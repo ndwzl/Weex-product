@@ -49,7 +49,7 @@
                                         <image v-if="!compareState[data.F_ProductId]" src="https://s.kcimg.cn/wap/images/detail/productApp/add.png" style="width:16px;height:16px;margin-right:5px"></image>
                                         <text class="comparison-text">{{compareState[data.F_ProductId] ? compareState[data.F_ProductId] : '对比'}}</text>
                                     </div>
-                                    <div class="floor-price" @click="goModelInfo(data,'footerPrice.weex.js')">
+                                    <div v-if="ele.status != '停售'" class="floor-price" @click="goModelInfo(data,'footerPrice.weex.js')">
                                         <text class="floor-price-text">询底价</text>
                                     </div>
                                 </div>

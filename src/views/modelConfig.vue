@@ -2,11 +2,9 @@
     <div :class="['config',!footerInfo.footerPrice? 'no-padding' : '']">
         <div v-if="iosTop" class="ios-top"></div>
         <list style="flex: 1" @scroll="sticky">
-            <cell>
+            <header>
                 <!--标题-->
                 <title :titleName="titleName"></title>
-            </cell>
-            <header>
                 <!--对比车型名称-->
                 <product-name :products="configData.products" :compareNumber="compareNumber"  @clear="clear" @goAddSeries="addSeriesPop"></product-name>
             </header>
