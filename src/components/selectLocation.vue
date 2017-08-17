@@ -1,6 +1,6 @@
 <template>
 
-    <div class="['location',iosTop ? 'noPadding' : '']">
+    <div :class="['location',iosTop ? 'noPadding' : '']">
             <div v-if="iosTop" class="ios-top"></div>
             <list class="location-wrapper"><!-- @scroll="scrollContent" ref="locationWrapper"-->
                 <!--头部-->
@@ -72,7 +72,7 @@
                 </div>
             </div>
             <!--侧边栏内容-->
-            <div class="['sidebar-content',iosTop ? 'noPadding' : '']" ref="side">
+            <div :class="['sidebar-content',iosTop ? 'noPadding' : '']" ref="side">
                 <div class="ios-top" v-if="iosTop"></div>
                 <list style="flex: 1">
                      <cell class="sidebar-header" v-if="showSidebar">

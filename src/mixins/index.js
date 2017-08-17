@@ -51,42 +51,42 @@ export default {
               this.showLoading()
             }
             //查看版本号
-            storage.getItem('versions',res => {
-                if(res.result == 'success'){
-                    this.getData("https://s.kcimg.cn/wap/js/appProduct/" + res.data + "/" + url,ele => {
-                        if(ele.statusText == 'OK'){
-                            navigator.push({
-                                url: "https://s.kcimg.cn/wap/js/appProduct/" + res.data + "/" + url,
-                                animated: 'true'
-                            },() => {
-                                //隐藏加载loading
-                                this.hideLoading()
-                            })
-                        }else{
-                            this.alert('网络错误')
-                            //隐藏加载loading
-                            this.hideLoading()
-                        }
-                    })
-                }
-            })
-
-            // this.getData("http://192.168.1.63:8080//dist/" + url,ele => {
-            //   // this.alert(JSON.stringify(ele))
-            //    if(ele.statusText == 'OK'){
-            //        navigator.push({
-            //            url: "http://192.168.1.63:8080//dist/" + url,
-            //            animated: 'true'
-            //        },() => {
-            //            //隐藏加载loading
-            //            this.hideLoading()
-            //        })
-            //    }else{
-            //        this.alert('网络错误')
-            //        //隐藏加载loading
-            //        this.hideLoading()
-            //    }
+            // storage.getItem('versions',res => {
+            //     if(res.result == 'success'){
+            //         this.getData("https://s.kcimg.cn/wap/js/appProduct/" + res.data + "/" + url,ele => {
+            //             if(ele.statusText == 'OK'){
+            //                 navigator.push({
+            //                     url: "https://s.kcimg.cn/wap/js/appProduct/" + res.data + "/" + url,
+            //                     animated: 'true'
+            //                 },() => {
+            //                     //隐藏加载loading
+            //                     this.hideLoading()
+            //                 })
+            //             }else{
+            //                 this.alert('网络错误')
+            //                 //隐藏加载loading
+            //                 this.hideLoading()
+            //             }
+            //         })
+            //     }
             // })
+
+            this.getData("http://192.168.1.63:8080//dist/" + url,ele => {
+              // this.alert(JSON.stringify(ele))
+               if(ele.statusText == 'OK'){
+                   navigator.push({
+                       url: "http://192.168.1.63:8080//dist/" + url,
+                       animated: 'true'
+                   },() => {
+                       //隐藏加载loading
+                       this.hideLoading()
+                   })
+               }else{
+                   this.alert('网络错误')
+                   //隐藏加载loading
+                   this.hideLoading()
+               }
+            })
         },
         //get请求数据
         getData(ajaxUrl,callback,type){
