@@ -117,7 +117,7 @@
     import otherBrandList from '../components/brandList/otherBrandList.vue'
     import errorPop from '../components/errorPop.vue'
     import mixins from '../mixins'
-
+    import cacheVersion from '../config/version.js'
 
     let stream = weex.requireModule('stream')
     let dom = weex.requireModule('dom')
@@ -482,21 +482,27 @@
             }
             // this.alert(JSON.stringify(weex.config.userId))
 
-//            //发送GA统计
+            //发送GA统计
             this.collect({
             })
 
+            // 发送谷歌统计
+            this.goUrlGa(weex.config.deviceId, 'product.m.360che.com', '产品库-品牌大全页', '品牌大全')
+
             //iconFont字体
             dom.addRule('fontFace',{
-                'fontFamily':'detail',
+                'fontFamily': 'detail',
                 'src':"url(\'https://at.alicdn.com/t/font_1z3q14vor7h3q5mi.ttf\')"
             });
-
             //请求接口,查看版本号
-            this.getData(this.ajaxUrl() + '/index.php?r=weex/index/version',ele => {
-                if(ele.ok && ele.data.info == 'ok'){
-                    storage.setItem('versions',ele.data.version)
+            this.getData(`${this.ajaxUrl()}/index.php?r=weex/index/version&ts=${+new Date()}`, ele => {
+                let currentVersion;
+                if (ele.ok && ele.data.info == 'ok' && ele.data.version) {
+                    currentVersion = ele.data.version
+                } else {
+                    currentVersion = cacheVersion
                 }
+                storage.setItem('versions', currentVersion)
             })
 
 //            storage.getItem('brandsData', ele => {
@@ -528,7 +534,7 @@
                         this.moreBrandShow = true;
                     });
                 }
-
+                storage.removeItem('compareTask')
                 //请求品牌数据
                 this.getBrandsData()
             })
@@ -564,7 +570,6 @@
 
             //调取地理位置信息
             thaw && thaw.getLocation();
-
         }
     }
 </script>

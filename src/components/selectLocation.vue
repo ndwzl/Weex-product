@@ -169,7 +169,7 @@
                console.log(this.$refs)
                 this.indexNav = this.locationData.indexNav[index];
                 let nav = [this.locationData.indexNav[index]][0];
-                dom.scrollToElement(this.$refs[nav][0], {offset: 0})
+                dom.scrollToElement(this.$refs[nav][0], {offset: -90})
             },
             //输入框搜索
             searchLocation(event){

@@ -17,10 +17,13 @@
                     <div class="caption">
                         <text class="caption-text">厂商指导价</text>
                     </div>
+                    <div class="caption-placeholder"></div>
+                    <div class="column-line column-line-left"></div>
                     <div class="content">
                         <text class="content-text" v-if="configData.products[0] && configData.products[0].F_Price && configData.products[0].F_Price != 0 &&  configData.products[0].F_Price != 'kong'">{{configData.products[0] && configData.products[0].F_Price}}万</text>
                         <text class="content-text" v-if="configData.products[0] && configData.products[0].F_Price == 0 || configData.products[0] && !configData.products[0].F_Price && configData.products[0].F_Price != 'kong'">暂无报价</text>
                     </div>
+                    <div class="column-line column-line-right"></div>
                     <div class="content">
                         <text class="content-text" v-if="configData.products[1] && configData.products[1].F_Price && configData.products[1].F_Price != 0 && configData.products[1].F_Price != 'kong'">{{configData.products[1] && configData.products[1].F_Price}}万</text>
                         <text class="content-text" v-if="configData.products[1] && configData.products[1].F_Price == 0 || configData.products[1] && !configData.products[1].F_Price && configData.products[1].F_Price != 'kong'">暂无报价</text>
@@ -30,10 +33,13 @@
                     <div class="caption">
                         <text class="caption-text">本地最低报价</text>
                     </div>
+                    <div class="caption-placeholder"></div>
+                    <div class="column-line column-line-left"></div>
                     <div class="content footer-price">
                         <text class="content-text" v-if="configData.lowPrice[0] && configData.lowPrice[0].F_BigPrice && configData.lowPrice[0].F_BigPrice != 0 && configData.lowPrice[0].F_BigPrice != 'kong'">{{configData.lowPrice[0] && configData.lowPrice[0].F_BigPrice}}万</text>
                         <text class="content-text" v-if="configData.lowPrice[0] && !configData.lowPrice[0].F_BigPrice && configData.lowPrice[0].F_BigPrice != 'kong'">暂无报价</text>
                     </div>
+                    <div class="column-line column-line-right"></div>
                     <div class="content footer-price">
                         <text class="content-text" v-if="configData.lowPrice[1] && configData.lowPrice[1].F_BigPrice && configData.lowPrice[1].F_BigPrice != 0 && configData.lowPrice[1].F_BigPrice != 'kong'">{{configData.lowPrice[1] && configData.lowPrice[1].F_BigPrice}}万</text>
                         <text class="content-text"  v-if="configData.lowPrice[1] && !configData.lowPrice[1].F_BigPrice && configData.lowPrice[1].F_BigPrice != 'kong'">暂无报价</text>
@@ -50,9 +56,12 @@
                     <div class="caption">
                         <text class="caption-text">{{item.F_ParameterName}}</text>
                     </div>
+                    <div class="caption-placeholder"></div>
+                    <div class="column-line column-line-left"></div>
                     <div class="content">
                         <text class="content-text">{{item.value + item.unit}}</text>
                     </div>
+                    <div class="column-line column-line-right"></div>
                     <div class="content">
                         <text class="content-text">{{configData.paramList[1] && configData.paramList[1][i] && configData.paramList[1][i].list && configData.paramList[1][i].list[index] && (configData.paramList[1][i].list[index].value + configData.paramList[1][i].list[index].unit)}}</text>
                     </div>
@@ -530,42 +539,55 @@
         flex-wrap: wrap;
         word-wrap: break-word;
         word-break: break-all;
-    }
-    .caption{
-        width:180px;
-        min-height:80px;
-        height:100%;
-        padding-top: 20px;
-        padding-bottom:20px;
-        justify-content: center;
-        align-items: center;
-        background-color:#f9f9f9;
+        align-items: stretch;
+
         border-bottom-width:1px;
         border-bottom-style: solid;
         border-bottom-color:#eee;
     }
+    .column-line {
+        display: block;
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        width: 1px; 
+        background-color: #eee;
+    }
+    .column-line-right {
+        right: 285px;
+    }
+    .column-line-left {
+        right: 570px;
+    }
+    .caption-placeholder {
+        flex: 1;
+    }
+    .caption {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        width: 180px; 
+        background-color: #f9f9f9;
+    }
     .caption-text{
         color:#666;
         font-size:24px;
+        padding-top:40px;
+        text-align:center;
     }
     .content{
-        flex: 1;
+        /*flex: 1;*/
         width:285px;
-        min-height:80px;
-        height:100%;
-        padding-top: 40px;
-        padding-bottom:40px;
+        /*min-height:80px;*/
+        /*height:100%;*/
+         padding-top: 33px;
+        padding-bottom:32px; 
         padding-right: 10px;
         padding-left: 10px;
         justify-content: center;
         align-items: center;
         flex-wrap: wrap;
-        border-bottom-width:1px;
-        border-bottom-style: solid;
-        border-bottom-color:#eee;
-        border-left-width:1px;
-        border-left-style: solid;
-        border-left-color:#eee;
     }
     .content-text{
         font-size: 28px;
@@ -574,6 +596,9 @@
         text-overflow: ellipsis;
         display: -webkit-box;
         overflow: hidden;
+        flex-wrap: wrap;
+        word-wrap: break-word;
+        word-break: break-all;
     }
     .footer-price{
         flex-direction:row;

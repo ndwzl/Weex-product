@@ -12,7 +12,7 @@
                 <!--卡车图片信息-->
                 <truck-image :truckImageData="truckImageData" url="seriesPhoto.weex.js"></truck-image>
                 <!--车型列表-->
-                <model-type-list v-if="seriesInfo.F_SubCategoryId" :seriesInfo="seriesInfo" :locationInfo="locationInfo" :el="el"></model-type-list>
+                <model-type-list v-if="seriesInfo.F_SubCategoryId" :update="modelTypeListUpdate" :seriesInfo="seriesInfo" :locationInfo="locationInfo" :el="el"></model-type-list>
                 <!--经销商-->
                 <dealer :seriesId="seriesInfo.F_SeriesId" :locationInfo="locationInfo" :dealerData="dealerData" @selectLocationPop="selectLocationPop" sum="false" :el="el"></dealer>
                 <!--文章-->
@@ -30,7 +30,7 @@
         <!--<footer-price></footer-price>-->
         <!--<keep-alive>-->
         <!--底层询底价浮层-->
-        <footerInfo :footerInfo="footerInfo" v-if="footerInfo.ProductId" :el="el"></footerInfo>
+        <footerInfo :footerInfo="footerInfo" :el="el"></footerInfo>
         <!--选地区弹层-->
         <select-location v-if="LocationPop" :locationData="locationData" @selectLocationPop="selectLocationPop" @getLocationInfo="getLocationInfo"></select-location>
         <!--</keep-alive>-->
@@ -175,7 +175,9 @@
                 //苹果头部白条
                 iosTop:false,
                 //统计
-                el:'产品库-子类车系综述页'
+                el:'产品库-子类车系综述页',
+                // 更新modelTypeList组件信息
+                modelTypeListUpdate: true
             }
         },
         methods:{
@@ -413,6 +415,9 @@
                 storage.setItem('p4',p4)
                 storage.setItem('p5',p5)
 
+                //改变子类id、车系id、品牌id
+                this.seriesInfo = ele.info;
+                this.modelTypeListUpdate = !this.modelTypeListUpdate;
 
                 storage.setItem('seriesInfo',JSON.stringify(ele.info),res => {
                     if(res.result == 'success'){
@@ -427,6 +432,7 @@
             }
         },
         created(){
+
 
             //监听用户点击安卓物理返回键
             globalEvent && globalEvent.addEventListener("onRespondNativeBack",(e) => {
@@ -453,9 +459,8 @@
             //请求车系数据
             this.getSeriesData();
 
-
             //如果是ios系统的话
-            if(weex.config.env.platform == 'iOS'){
+            if(weex.config.env && weex.config.env.platform && weex.config.env.platform == 'iOS'){
                 //头部的高度
                 this.iosTop = true;
                 // 获取定位地区的缓存

@@ -362,13 +362,19 @@
             },
             //查看类似车型
             examineSimilar(){
+                //锚点跳转到全部相似车型
                 let examine = this.$refs['examine'];
-                dom.scrollToElement(examine, {offset: 0})
+                dom.scrollToElement(examine, {offset: -68})
                 // dom.scrollToElement(this.$refs['examine'][0], {offset: 0})
-                this.examineSimliarData.content.forEach((ele,index) => {
-                    ele.show = true;
-                })
 
+                // 遍历删选条件 如果有条件就不显示所有数据
+                for(key in this.optionCondition){
+                    if(key) return
+                }
+                //循环所有数据，显示所有数据
+                this.examineSimliarData.content.forEach((ele,index) => {
+                    this.$set(this.examineSimliarData.content[index],'show',true)
+                })
             },
             //换车型弹框
             switchModelShow(){
@@ -382,6 +388,12 @@
                 //切换车型id
                 this.ProductId = ProductId;
                 this.footerInfo.productId = ProductId;
+
+                //存储车型id
+                storage.setItem('ProductId',ProductId);
+
+                //存储询底价车型id
+                storage.setItem('priceProductId',ProductId);
 
                 //发送PV
 //                storage.getItem('p4',p4 => {

@@ -7,114 +7,115 @@ var globalEvent = weex.requireModule('globalEvent')
 let storage = weex.requireModule('storage')
 export default {
     methods: {
-        alert (text) {
+        alert(text) {
             modal.alert({
                 message: text
             })
         },
         //返回上一个页面
-        goBack(){
+        goBack() {
             //如果打开选择地区，那么关闭选择地区弹层
-            if(this.LocationPop){
+            if (this.LocationPop) {
                 this.LocationPop = false;
                 return
             }
             //如果打开换车型弹层，那么关闭换车型弹层
-            if(this.switchModelPop){
+            if (this.switchModelPop) {
                 this.switchModelPop = false;
                 return
             }
 
             //选择车型页面弹层，关闭选车弹层
-            if(this.selectProductPop){
+            if (this.selectProductPop) {
                 this.selectProductPop = false;
                 return
             }
 
             //选择车系弹层，关闭选择车系弹层
-            if(this.addSeriesShow){
+            if (this.addSeriesShow) {
                 this.addSeriesShow = false;
-                return ;
+                return;
             }
 
             //this.alert(this.navInfo)
             navigator.pop();
         },
         //直接跳转m端页面
-        goUrl (url) {
+        goUrl(url) {
             thaw.goUrl(url)
         },
         //跳入到weex页面
-        goWeexUrl(url){
+        goWeexUrl(url) {
             //如果是苹果 点击的时候显示弹层，之后在去掉
-            if(weex.config.env.platform == 'iOS'){
-              this.showLoading()
+            if (weex.config.env && weex.config.env.platform == 'iOS') {
+                this.showLoading()
             }
             //查看版本号
-            // storage.getItem('versions',res => {
-            //     if(res.result == 'success'){
-            //         this.getData("https://s.kcimg.cn/wap/js/appProduct/" + res.data + "/" + url,ele => {
-            //             if(ele.statusText == 'OK'){
-            //                 navigator.push({
-            //                     url: "https://s.kcimg.cn/wap/js/appProduct/" + res.data + "/" + url,
-            //                     animated: 'true'
-            //                 },() => {
-            //                     //隐藏加载loading
-            //                     this.hideLoading()
-            //                 })
-            //             }else{
-            //                 this.alert('网络错误')
-            //                 //隐藏加载loading
-            //                 this.hideLoading()
-            //             }
+            storage.getItem('versions', res => {
+                if (res.result == 'success') {
+                    this.getData("https://s.kcimg.cn/wap/js/appProduct/" + res.data + "/" + url, ele => {
+                        if (ele.statusText == 'OK') {
+                            navigator.push({
+                                url: "https://s.kcimg.cn/wap/js/appProduct/" + res.data + "/" + url,
+                                animated: 'true'
+                            }, () => {
+                                //隐藏加载loading
+                                this.hideLoading()
+                            })
+                        } else {
+                            this.alert('网络错误')
+                                //隐藏加载loading
+                            this.hideLoading()
+                        }
+                    })
+                }
+            })
+
+            // this.getData("http://192.168.1.145:8080/dist/" + url, ele => {
+            //     // this.alert(JSON.stringify(ele))
+            //     if (ele.statusText == 'OK') {
+            //         navigator.push({
+            //             // url: "http://192.168.1.145:8080/dist/" + url,
+            //             url: "https://s.kcimg.cn/wap/js/appProduct/1.0.5/" + url,
+            //             animated: 'true'
+            //         }, () => {
+            //             //隐藏加载loading
+            //             this.hideLoading()
             //         })
+            //     } else {
+            //         this.alert('网络错误')
+            //             //隐藏加载loading
+            //         this.hideLoading()
             //     }
             // })
-
-            this.getData("http://192.168.1.63:8080//dist/" + url,ele => {
-              // this.alert(JSON.stringify(ele))
-               if(ele.statusText == 'OK'){
-                   navigator.push({
-                       url: "http://192.168.1.63:8080//dist/" + url,
-                       animated: 'true'
-                   },() => {
-                       //隐藏加载loading
-                       this.hideLoading()
-                   })
-               }else{
-                   this.alert('网络错误')
-                   //隐藏加载loading
-                   this.hideLoading()
-               }
-            })
         },
         //get请求数据
-        getData(ajaxUrl,callback,type){
+        getData(ajaxUrl, callback, type) {
 
             let dataType = 'json';
-            if(type){
+            if (type) {
                 dataType = type;
             }
             return stream.fetch({
-                method:'GET',
-                type:dataType,
-                url:ajaxUrl
-            },callback)
+                method: 'GET',
+                type: dataType,
+                url: ajaxUrl
+            }, callback)
         },
         //post请求数据
-        postData(ajaxUrl,data,callback){
+        postData(ajaxUrl, data, callback) {
             return stream.fetch({
-                method:'GET',
-                type:'text',
-                headers:{
-                    'Content-Type':'application/json'
+                method: 'GET',
+                type: 'text',
+                headers: {
+                    'Content-Type': 'application/json'
                 },
-                url:ajaxUrl,
-                body:JSON.stringify(data)
-            },callback)
+                url: ajaxUrl,
+                body: JSON.stringify(data)
+            }, callback)
         },
         //请求链接
-        ajaxUrl(){
+        ajaxUrl() {
             let DEV = 'https://product.360che.com';
             let BUILD = 'http://product-yufabu.360che.com';
             let DBUG = true;
@@ -122,19 +123,19 @@ export default {
             return ajaxUrl;
         },
         //显示加载loading
-        showLoading(){
+        showLoading() {
             thaw && thaw.onShowLoading()
         },
         //隐藏加载loading
-        hideLoading(){
+        hideLoading() {
             thaw && thaw.onHideLoading()
         },
         //IOS控制高度
-        iosTop(){
+        iosTop() {
             //this.alert(this.nihao)
         },
         //发送ga
-        GA(p2,p3,p4,p5){
+        GA(p2, p3, p4, p5) {
             //let source = '';
             //let deviceId = ''
             //if (weex.config.env.platform == 'android') {
@@ -172,61 +173,61 @@ export default {
             //    })
             //}
         },
-        goUrlGa(cid,dh,dp,dt){
+        goUrlGa(cid, dh, dp, dt) {
             let tid = '';
             let cId = cid;
-            if (weex.config.env.platform == 'android') {
+            if (weex.config.env && weex.config.env.platform == 'android') {
                 tid = 'UA-64002767-20';
-                let ajaxUrl = 'https://www.google-analytics.com/collect?v=1&tid=' + tid + '&cid=' + cId + '&t=pageview&dh=' + dh + '&dp=' + encodeURIComponent(dp) + '&dt=' + encodeURIComponent(dt)
-                this.getData(ajaxUrl,ele => {
+                let ajaxUrl = 'https://www.google-analytics.com/collect?v=1&tid=' + tid + '&cid=' + cId + '&t=pageview&dh=' + dh + '&dp=' + encodeURI(dp) + '&dt=' + encodeURI(dt)
+                this.getData(ajaxUrl, ele => {
                     //if (ele.ok) {
                     //    this.alert(ajaxUrl)
                     //}else{
                     //    this.alert(ajaxUrl)
                     //    this.alert(JSON.stringify(ele))
                     //}
-                },'text')
-            } else if (weex.config.env.platform == 'iOS') {
+                }, 'text')
+            } else if (weex.config.env && weex.config.env.platform == 'iOS') {
                 tid = 'UA-64002767-21';
-                storage.getItem('deviceId',res => {
-                    if(res.result == 'success'){
+                storage.getItem('deviceId', res => {
+                    if (res.result == 'success') {
                         cId = res.data;
-                        let ajaxUrl = 'https://www.google-analytics.com/collect?v=1&tid=' + tid + '&cid=' + cId + '&t=pageview&dh=' + dh + '&dp=' + encodeURIComponent(dp) + '&dt=' + encodeURIComponent(dt)
-                        this.getData(ajaxUrl,ele => {
+                        let ajaxUrl = 'https://www.google-analytics.com/collect?v=1&tid=' + tid + '&cid=' + cId + '&t=pageview&dh=' + dh + '&dp=' + encodeURI(dp) + '&dt=' + encodeURI(dt)
+                        this.getData(ajaxUrl, ele => {
                             if (ele.ok) {
                                 //this.alert('https://www.google-analytics.com/collect?v=1&tid=' + tid + '&cid=' + cId + '&t=pageview&dh=' + dh + '&dp=' + dp + '&dt=' + dt)
                             }
-                        },'text')
+                        }, 'text')
                     }
                 })
             }
         },
 
-        eventGa(cid,ec,ea,el){
+        eventGa(cid, ec, ea, el) {
             let tid = '';
             let cId = cid;
 
-            if (weex.config.env.platform == 'android') {
+            if (weex.config.env && weex.config.env.platform == 'android') {
                 tid = 'UA-64002767-20';
-                let ajaxUrl = 'https://www.google-analytics.com/collect?v=1&tid=' + tid + '&cid=' + cId + '&t=event&ec=' + encodeURIComponent(ec) + '&ea=' + encodeURIComponent(ea) + '&el=' + encodeURIComponent(el)
-                this.getData(ajaxUrl,ele => {
+                let ajaxUrl = 'https://www.google-analytics.com/collect?v=1&tid=' + tid + '&cid=' + cId + '&t=event&ec=' + encodeURI(ec) + '&ea=' + encodeURI(ea) + '&el=' + encodeURI(el)
+                this.getData(ajaxUrl, ele => {
                     //this.alert(JSON.stringify(ele))
-                    if(ele.ok){
+                    if (ele.ok) {
                         //this.alert(ajaxUrl)
                     }
-                },'text')
-            } else if (weex.config.env.platform == 'iOS') {
+                }, 'text')
+            } else if (weex.config.env && weex.config.env.platform == 'iOS') {
                 tid = 'UA-64002767-21';
-                storage.getItem('deviceId',res => {
-                    if(res.result == 'success'){
+                storage.getItem('deviceId', res => {
+                    if (res.result == 'success') {
                         cId = res.data;
-                        let ajaxUrl = 'https://www.google-analytics.com/collect?v=1&tid=' + tid + '&cid=' + cId + '&t=event&ec=' + encodeURIComponent(ec) + '&ea=' + encodeURIComponent(ea) + '&el=' + encodeURIComponent(el)
-                        this.getData(ajaxUrl,ele => {
-                            if(ele.ok){
+                        let ajaxUrl = 'https://www.google-analytics.com/collect?v=1&tid=' + tid + '&cid=' + cId + '&t=event&ec=' + encodeURI(ec) + '&ea=' + encodeURI(ea) + '&el=' + encodeURI(el)
+                        this.getData(ajaxUrl, ele => {
+                            if (ele.ok) {
                                 //this.alert(ajaxUrl)
                                 //this.alert('https://www.google-analytics.com/collect?v=1&tid=' + tid + '&cid=' + cId + '&t=event&ec=' + ec + '&ea=' + ea + '&el=' + el)
                             }
-                        },'text')
+                        }, 'text')
                     }
                 })
             }
@@ -234,28 +235,28 @@ export default {
 
         //GA统计
         // PV/UV
-        collect (o){
+        collect(o) {
             let userId = '';
             let deviceid = '';
 
             //如果是安卓
-            if(weex.config && weex.config.deviceId){
+            if (weex.config && weex.config.deviceId) {
                 deviceid = weex.config.deviceId;
-                userId      = weex.config.userId;
-            }else{
+                userId = weex.config.userId;
+            } else {
                 // IOS
-                storage.getItem('deviceId',ele => {
-                    if(ele.result == 'success'){
+                storage.getItem('deviceId', ele => {
+                    if (ele.result == 'success') {
                         deviceid = ele.data;
                     }
                 });
 
-                storage.getItem('userId',ele => {
+                storage.getItem('userId', ele => {
                     userId = ele.data;
                 })
             }
 
-            let platform = '';     // 平台：and_app(android),ios_app(iPhone)
+            let platform = ''; // 平台：and_app(android),ios_app(iPhone)
 
             if (weex.config.env.platform == 'android') {
                 platform = 'and_app';
@@ -268,56 +269,56 @@ export default {
 
             let time = setTimeout(() => {
 
-                var epnonestats = +new Date() + '_' + (Math.floor(Math.random () * 90) + 10)//btoa(+new Date()).substring(0,16);  // 16位随机串
+                var epnonestats = +new Date() + '_' + (Math.floor(Math.random() * 90) + 10) //btoa(+new Date()).substring(0,16);  // 16位随机串
 
                 let parameter = `epnonestats=${epnonestats}&type=enter&source=${platform}&deviceid=${deviceid}&uid=${userId}&p1=${p1}&p2=${p2}`;
-                for(let i in o){
+                for (let i in o) {
                     parameter += `&${i}=${o[i]}`
                 }
                 //发送
-                this.send(parameter,ele => {
-                    if(ele.ok){
+                this.send(parameter, ele => {
+                    if (ele.ok) {
                         // this.alert(parameter)
                         clearTimeout(time)
                     }
                 })
 
-            },300)
+            }, 300)
 
         },
         //  事件类
-        event (o){
+        event(o) {
             var userId = '';
             var deviceid = '';
 
             //如果是安卓
-            if(weex.config && weex.config.deviceId){
+            if (weex.config && weex.config.deviceId) {
                 deviceid = weex.config.deviceId;
-                userId      = weex.config.userId;
-            }else{
+                userId = weex.config.userId;
+            } else {
                 // IOS
-                storage.getItem('deviceId',ele => {
-                    if(ele.result == 'success'){
+                storage.getItem('deviceId', ele => {
+                    if (ele.result == 'success') {
                         deviceid = ele.data;
                     }
                 });
 
-                storage.getItem('userId',ele => {
+                storage.getItem('userId', ele => {
                     userId = ele.data;
                 })
             }
 
-            var platform = ''     // 平台：and_app(android),ios_app(iPhone)
+            var platform = '' // 平台：and_app(android),ios_app(iPhone)
 
 
 
-            if (weex.config.env.platform == 'android') {
+            if (weex.config.env && weex.config.env.platform == 'android') {
                 platform = 'and_app';
-            } else if (weex.config.env.platform == 'iOS') {
+            } else if (weex.config.env && weex.config.env.platform == 'iOS') {
                 platform = 'ios_app'
             }
 
-            var epnonestats =  +new Date() + '_' + (Math.floor(Math.random () * 90) + 10) //btoa(+new Date()).substring(0,16)  // 16位随机串
+            var epnonestats = +new Date() + '_' + (Math.floor(Math.random() * 90) + 10) //btoa(+new Date()).substring(0,16)  // 16位随机串
 
             let p1 = 3;
             let p2 = 0;
@@ -335,22 +336,22 @@ export default {
                         clearTimeout(time)
                     }
                 })
-            },300)
+            }, 300)
         },
         //发送
-        send (parameter,callback){
+        send(parameter, callback) {
             return stream.fetch({
-                method:'GET',
-                type:'json',
-                url:'https://stats.360che.com/app_tj.htm?' + parameter
-            },callback)
+                method: 'GET',
+                type: 'json',
+                url: 'https://stats.360che.com/app_tj.htm?' + parameter
+            }, callback)
         }
     },
-    created(){
+    created() {
         //iconFont字体
-        dom.addRule('fontFace',{
-            'fontFamily':'detail',
-            'src':"url(\'https://at.alicdn.com/t/font_9uxuxvowyib5ipb9.woff\')"
+        dom.addRule('fontFace', {
+            'fontFamily': 'detail',
+            'src': "url(\'https://at.alicdn.com/t/font_9uxuxvowyib5ipb9.woff\')"
         });
     }
 }

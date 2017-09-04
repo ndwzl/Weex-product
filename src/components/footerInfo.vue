@@ -13,7 +13,7 @@
 		</div>
 		<div :class="['floor-price',footerInfo.compare || footerInfo.list.length > 2 ? '' : 'long-floor-price']" @click="goFooterPrice" v-if="footerInfo.footerPrice">
 			<text class="price-text">询底价</text>
-			<text class="number">{{footerInfo.askTotal > 100 ? '已有' + footerInfo.askTotal + '人询价' : '已有100人+询底价'}}</text>
+			<text class="number" v-if="footerInfo">{{footerInfo.askTotal > 100 ? '已有' + footerInfo.askTotal + '人询价' : '已有100人+询底价'}}</text>
 		</div>
 	</div>
 </template>
