@@ -1,9 +1,10 @@
 <template>
     <div  class="model">
         <div v-if="iosTop" class="ios-top"></div>
+
         <list style="flex: 1">
             <header ref="goTop">
-                <title :titleName="titleName" :shareData="shareData" :ProductId="ProductId"></title>
+                <title needShare="1" @shareToggle="shareShow" :titleName="titleName" :shareData="shareData" :ProductId="ProductId" :el="el"></title>
             </header>
             <cell>
                 <nav :navList="navList"></nav>
@@ -16,7 +17,7 @@
                     <div class="switch-model-button" @click="switchModelShow">
                         <!--<text :style="{fontFamily:'detail',fontSize:'32px',color:'#586c94'}">&#x5237;</text>-->
                         <image src="https://s.kcimg.cn/wap/images/detail/productApp/switch-model.png" style="width:38px;height:32px"></image>
-                        <text class="switch-model-button-text">换车型</text>
+                        <text class="switch-model-button-text">{{isParts ? '换型号' : '换车型'}}</text>
                     </div>
                 </div>
                 <div class="quote-wrapper" v-if="areaPrice.length">
@@ -40,13 +41,15 @@
         <!--选地区弹层-->
         <selectLocation v-if="LocationPop" :locationData="locationData" @selectLocationPop="selectLocationPop" @getLocationInfo="getLocationInfo"></selectLocation>
         <!--换车型弹层-->
-        <switch-model v-if="switchModelData.paramName" :switchModelPop="switchModelPop" :switchModelData="switchModelData" :ProductId="ProductId" @goSwitchModel="goSwitchModel" @switchModelShow="switchModelShow"></switch-model>
+        <switch-model v-if="switchModelData.priceList && switchModelData.priceList.length" :switchModelPop="switchModelPop" :switchModelData="switchModelData" :ProductId="ProductId" @goSwitchModel="goSwitchModel" @switchModelShow="switchModelShow"></switch-model>
         <!--底层询底价浮层-->
         <footerInfo :footerInfo="footerInfo" @compare="compare" :compareState="compareState" :el="el"></footerInfo>
         <!--对比按钮-->
         <div :class="['compare',compareNumber == 0 ? 'compare-hide' : '']" ref="compare" @click="goCompare">
             <text class="compare-text">对比  ({{compareNumber}})</text>
         </div>
+        <!-- weex分享 -->
+        <weexShare :shareParams="shareData" :showShare="showShare" @shareCallBack="shareCallBack"></weexShare>
     </div>
 </template>
 
@@ -76,6 +79,7 @@
                 titleName:'',
                 //车系ID
                 seriesId:'',
+                showShare: false,
                 //分享数据
                 shareData:{
                     title: "", // 分享标题
@@ -174,7 +178,8 @@
                 LocationPop:false,
                 //选择地区列表数据
                 locationData:{},
-
+                // 是否是配件（配件不显示询底价）
+                isParts: false,
                 //底层询底价信息
                 footerInfo:{
                     //询底价数量
@@ -210,10 +215,20 @@
                 iosTop:false,
                 //统计
                 el:'产品库-车型综述页'
-
             }
         },
         methods:{
+            shareShow () {
+                this.showShare = true
+            },
+            shareCallBack (data) {
+                // 分享成功
+                if (data.status === '0') {
+                    const platformList = ['微信好友', '微信朋友圈', 'QQ好友', 'QQ空间', '新浪微博', '复制链接']
+                    const platform = platformList[data.platform]
+                    this.eventGa(weex.config.deviceId, '分享产品库成功', this.el, platform)
+                }
+            },
             //请求车型数据
             getModelData(){
 
@@ -238,6 +253,8 @@
                 //请求车型数据
                 this.getData(this.ajaxUrl() + '/index.php?r=weex/product/price/&proId=' + this.ProductId + '&provinceId=' + this.locationInfo.provinceId + '&cityId=' + this.locationInfo.cityId,(ele) => {
                     if(ele.ok){
+                        // 判断是否为配件
+                        if (ele.data.proInfo.F_CateName === '配件') this.isParts = true
                         //标题
                         this.titleName = ele.data.proInfo.F_ProductName;
 
@@ -258,7 +275,7 @@
                         this.truckImageData.imgUrl = ele.data.proInfo.imgUrl;
 
                         //判断车型是不是停售
-                        if(ele.data.proInfo.F_IsStopMake == 4){
+                        if(ele.data.proInfo.F_IsStopMake == 4 || this.isParts){
                             this.footerInfo.footerPrice = false;
                         }else{
                             this.footerInfo.footerPrice = true;
@@ -276,7 +293,6 @@
                         this.gatherTotal = ele.data.gatherTotal;
                         //参数配置数据
                         this.parameterData = ele.data.mainParam;
-                        console.log( this.parameterData,' this.parameterData')
                         //查看详细参数配置url
                         this.moreParamUrl = ele.data.moreParamUrl;
                         //相似车型可选配置数据
@@ -320,7 +336,6 @@
                         this.hideLoading()
                     }
                 });
-
                 //请求换车型数据
                 this.getData(this.ajaxUrl() + '/index.php?r=weex/product/get-product-change-list&subId=' +  this.seriesInfo.F_SubCategoryId + '&seriesId=' + this.seriesInfo.F_SeriesId + '&proId=' + this.ProductId,(ele) => {
                     if(ele.ok){
@@ -349,7 +364,6 @@
                             })
                             this.$set(this.switchModelData, 'paramName', paramName);
                         }
-
                         //隐藏加载loading
                         this.hideLoading()
                     }
@@ -774,13 +788,12 @@
             }
         },
         created(){
-
             //监听用户点击安卓物理返回键
             globalEvent && globalEvent.addEventListener("onRespondNativeBack",(e) => {
                 this.goBack();
             });
 
-            if(weex.config.env.platform == 'iOS'){
+            if(weex.config.env && weex.config.env.platform == 'iOS'){
                 this.iosTop = true;
             }
 
@@ -805,7 +818,6 @@
                                     this.$set(this.compareState,res,'已加入')
                                     this.compareNumber++
                                 })
-                                console.log(JSON.parse(ele.data)[this.seriesId],'ele.data')
                             }
                         }
                     })

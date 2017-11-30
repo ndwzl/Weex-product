@@ -13,17 +13,25 @@
                     <!--</div>-->
                 <!--</scroller>-->
             </div>
-            <div v-if="shareData" class="share" @click="shade">
+            <div v-if="needShare" class="share" @click="share">
                 <text class="share-text">分享</text>
+            </div>
+            <div v-if="reset" class="reset" @click="resetCallback">
+                <div class="reset-cont">
+                    <image class="reset-icon" src="https://s.kcimg.cn/wap/images/detail/productApp/switch-model.png"></image>
+                    <div class="reset-text-wraper">
+                        <text class="reset-text">重选</text>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 </template>
 
 <script type="text/babel">
-    let thaw = weex.requireModule('THAW');
+    const thaw = weex.requireModule('THAW')
     export default {
-        props:['titleName','black','shareData','imgInfo','seriesId','ProductId'],
+        props:['titleName','black','needShare','imgInfo','seriesId','ProductId','reset', 'el'],
         data(){
             return {
                 iosTop:false
@@ -35,7 +43,11 @@
             }
         },
         methods:{
-            shade(){
+            // 重选
+            resetCallback () {
+                this.$emit('resetFilter')
+            },
+            share () {
                 let plat = 'and';
                 let type = 'ps';
                 let tid = this.seriesId;
@@ -48,7 +60,7 @@
                     type = 'pp'
                     tid = this.ProductId
                 }
-
+                // 大数据统计
                 this.event({
                     tag:'act',
                     plat:plat,
@@ -57,8 +69,12 @@
                     flag:2,
                     slot:0
                 })
-
-                thaw.onShowShare(this.shareData)
+                // ga统计
+                this.eventGa(weex.config.deviceId,'点击产品库分享按钮',this.el,'')
+                // weex share
+                this.$emit('shareToggle')
+                // native share
+                // thaw.onShowShare(this.shareData)
             },
             goback(){
                 //图片页 && 发送给父元素事件
@@ -200,4 +216,28 @@
         /*border-left-color:rgba(255,255,255,.8);*/
         /*border-left-style: solid;*/
     /*}*/
+    .reset {
+        position: absolute;
+        right: 0;
+        top: 0;
+        width: 124px;
+        height: 100%;
+    }
+    .reset-cont {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        padding-right: 30px;
+    }
+    .reset-icon {
+        width: 32px;
+        height: 28px;
+        margin-right: 10px;
+    }
+    .reset-text {
+        color: #586c94;
+        font-size: 28px;
+    }
 </style>

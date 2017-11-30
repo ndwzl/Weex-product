@@ -46,7 +46,7 @@
                     </div>
                 </div>
             </cell>
-            <cell v-for="(ele,i) in configData.paramList[0]" v-if="ele.list.length" class="model" :ref="ele.F_ParameterTypeName">
+            <cell v-for="(ele,i) in configData.paramList[0]" v-if="ele.list && ele.list.length" class="model" :ref="ele.F_ParameterTypeName">
                 <div class="title">
                     <text class="title-text">{{ele.F_ParameterTypeName}}</text>
                 </div>
@@ -77,7 +77,7 @@
             <div class="classify-info" @click="anchor('车型信息')">
                 <text class="classify-info-text">车型信息</text>
             </div>
-            <div class="classify-info" v-if="configData.paramList[0].length && configData.paramList[0][index].list.length" v-for="(ele,index) in configData.paramList[0]" @click="anchor(ele.F_ParameterTypeName)">
+            <div class="classify-info" v-if="configData.paramList[0] && configData.paramList[0].length && configData.paramList[0][index].list.length" v-for="(ele,index) in configData.paramList[0]" @click="anchor(ele.F_ParameterTypeName)">
                 <text class="classify-info-text">{{ele.F_ParameterTypeName}}</text>
             </div>
         </div>
@@ -139,7 +139,7 @@
                 this.goBack();
             });
 
-            if(weex.config.env.platform == 'iOS'){
+            if(weex.config.env && weex.config.env.platform == 'iOS'){
                 this.iosTop = true;
             }
 
@@ -156,13 +156,11 @@
             storage.getItem('seriesInfo',ele => {
                 if(ele.result == 'success'){
                     this.seriesInfo = JSON.parse(ele.data)
-
                     //获取车型对比信息
                     storage.getItem('compareData',compare => {
                         if(compare.result == 'success'){
                             let data = JSON.parse(compare.data)[this.seriesInfo.F_SubCategoryId];
-
-                            if(data.length){
+                            if(data && data.length){
                                 let product;
                                 if(data.length == 2){
                                     product = data[0] + '_' + data[1];
@@ -322,7 +320,7 @@
                 }else{
                     ele = this.$refs[index][0]
                 }
-                dom.scrollToElement(ele, {offset: -280})
+                dom.scrollToElement(ele, {offset: -368})
                 this.classifyPop = false;
             },
             //询底价
@@ -582,7 +580,7 @@
         /*min-height:80px;*/
         /*height:100%;*/
          padding-top: 33px;
-        padding-bottom:32px; 
+        padding-bottom:32px;
         padding-right: 10px;
         padding-left: 10px;
         justify-content: center;

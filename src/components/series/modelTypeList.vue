@@ -492,7 +492,18 @@
             //获取对比存储数据
             storage.getItem('compareTask',(comper) => {
                 if(comper.result == 'success'){
+                    //赋值对比信息
                     this.compareTask = JSON.parse(comper.data);
+                    // 判断当前车系是否有加入对比的车型
+                    if(this.compareTask[this.seriesInfo.F_SubCategoryId] && this.compareTask[this.seriesInfo.F_SubCategoryId].length){
+                        //如果有对比的车型，那么赋值对比车型数量
+                        this.compareNumber = this.compareTask[this.seriesInfo.F_SubCategoryId].length
+                        //循环对比车型数量，改变对比车型状态为已加入
+                        this.compareTask[this.seriesInfo.F_SubCategoryId].forEach(id => {
+                            //加入对比
+                            this.$set(this.compareState,id,'已加入');
+                        })
+                    }
                 }
             });
             this.getDataForInit()

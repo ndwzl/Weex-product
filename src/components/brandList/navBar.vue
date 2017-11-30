@@ -3,14 +3,13 @@
         <div class="inner">
             <text class="nav-text selected">品牌</text>
         </div>
-        <div class="inner" @click="goUrl('https://product.m.360che.com/price/')">
+        <div class="inner" @click="jump(0)">
             <text class="nav-text">筛选</text>
-
         </div>
-        <div class="inner" @click="goUrl('https://product.m.360che.com/sel/')">
+        <div class="inner" @click="jump(1)">
             <text class="nav-text">按工况</text>
         </div>
-        <div class="inner" @click="goUrl('https://top.m.360che.com/')">
+        <div class="inner" @click="jump(2)">
             <text class="nav-text">排行榜</text>
         </div>
         <div class="history" @click="historyShow" >
@@ -20,11 +19,46 @@
     </div>
 </template>
 
+
 <script type="text/babel">
+    import version from '../../config/version'
     export default {
         methods:{
             historyShow(){
                 this.$emit('historyShow')
+            },
+            getMiddleVersion () {
+                return Number(version.match(/\.(\d)\./)[1])
+            },
+            jump (page) {
+                const middleVersion = this.getMiddleVersion()
+                // 版本预判跳转
+                switch (page) {
+                    case 0:
+                        // 筛选
+                        if (middleVersion >= 1) {
+                            this.goWeexUrl('filter.weex.js')
+                        } else {
+                            this.goUrl('https://product.m.360che.com/price/')
+                        }
+                        break;
+                    case 1:
+                        // 按工况
+                        if (middleVersion >= 2) {
+                            this.goWeexUrl('condition.weex.js')
+                        } else {
+                            this.goUrl('https://product.m.360che.com/sel/')
+                        }
+                        break;
+                    case 2:
+                        // 排行榜
+                        if (middleVersion >= 3) {
+                            this.goWeexUrl('top.weex.js')
+                        } else {
+                            this.goUrl('https://top.m.360che.com/')
+                        }
+                        break;
+                }
             }
         }
     }

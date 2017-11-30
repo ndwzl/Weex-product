@@ -15,7 +15,7 @@
                         <text class="all-product-text">全部车型</text>
                     </div>
                 </div>
-                <div class="options" v-if="switchModelData.attrList">
+                <div class="options" v-if="switchModelData.attrList && switchModelData.attrList.length">
                     <div v-for="(ele,index) in switchModelData.attrList" :class="['option',selected ==  switchModelData.attrList[index] ? 'selected-option' : '']" @click="selectOption(index)">
                         <text :class="['option-text',selected == switchModelData.attrList[index] ? 'selected-option-text' : '']">{{ele}}</text>
                     </div>
@@ -27,7 +27,7 @@
                         <!--<div class="model-name">-->
                             <text :class="['model-name-text',res.F_ProductId == ProductId ? 'selected-model-name' : '']">{{res.specialProName}}</text>
                         <!--</div>-->
-                        <div class="tags">
+                        <div class="tags" v-if="switchModelData.attrList.length">
                             <div class="tags-wrapper">
                                 <text v-for="tag in res.paramDetail" class="tag">{{tag}}</text>
                             </div>
@@ -73,7 +73,9 @@
                 })
             },
             selectOption(index){
-               this.selected = this.switchModelData.attrList[index];
+              if (this.switchModelData.attrList) {
+                this.selected = this.switchModelData.attrList[index];
+              }
             },
             //取消换车型
             switchModelShow(){
@@ -100,7 +102,7 @@
             }
         },
         created(){
-            if(weex.config.env.platform == 'iOS'){
+            if(weex.config.env && weex.config.env.platform == 'iOS'){
                 this.iosTop = true;
 //                this.alert(this.iosTop)
             }

@@ -71,12 +71,11 @@ export default {
                 }
             })
 
-            // this.getData("http://192.168.1.145:8080/dist/" + url, ele => {
+            // this.getData("http://192.168.1.221:8080/dist/" + url, ele => {
             //     // this.alert(JSON.stringify(ele))
             //     if (ele.statusText == 'OK') {
             //         navigator.push({
-            //             // url: "http://192.168.1.145:8080/dist/" + url,
-            //             url: "https://s.kcimg.cn/wap/js/appProduct/1.0.5/" + url,
+            //             url: "http://192.168.1.221:8080/dist/" + url,
             //             animated: 'true'
             //         }, () => {
             //             //隐藏加载loading
@@ -115,11 +114,10 @@ export default {
             }, callback)
         },
         //请求链接
-        ajaxUrl() {
+        ajaxUrl (DEBUG = true) {
             let DEV = 'https://product.360che.com';
             let BUILD = 'http://product-yufabu.360che.com';
-            let DBUG = true;
-            let ajaxUrl = DBUG ? DEV : BUILD;
+            let ajaxUrl = DEBUG ? DEV : BUILD;
             return ajaxUrl;
         },
         //显示加载loading
@@ -173,6 +171,7 @@ export default {
             //    })
             //}
         },
+        //Ga统计
         goUrlGa(cid, dh, dp, dt) {
             let tid = '';
             let cId = cid;
@@ -202,7 +201,7 @@ export default {
                 })
             }
         },
-
+        //Ga时事件统计
         eventGa(cid, ec, ea, el) {
             let tid = '';
             let cId = cid;
@@ -233,7 +232,7 @@ export default {
             }
         },
 
-        //GA统计
+        //大数据统计
         // PV/UV
         collect(o) {
             let userId = '';
@@ -258,27 +257,39 @@ export default {
 
             let platform = ''; // 平台：and_app(android),ios_app(iPhone)
 
-            if (weex.config.env.platform == 'android') {
+            if (weex.config.env && weex.config.env.platform == 'android') {
                 platform = 'and_app';
-            } else if (weex.config.env.platform == 'iOS') {
+            } else if (weex.config.env && weex.config.env.platform == 'iOS') {
                 platform = 'ios_app'
             }
-
+            // 生成参数数组(p1~p20)
+            let pArr = new Array(20);
+            for (let i = 0; i < 20; i++) {
+                pArr[i] = `p${i+1}`;
+            }
+            // p1 = 0：开屏, 1:资讯, 2:论坛, 3:选车, 4:我的, 5:卡友圈
+            // p2 = 0：品牌 1：筛选 2：按工况 3：排行 4：历史记录
             let p1 = 3;
-            let p2 = 0;
-
+            delete o.p1;
+            o.p2 = o.p2 || 0;
             let time = setTimeout(() => {
 
-                var epnonestats = +new Date() + '_' + (Math.floor(Math.random() * 90) + 10) //btoa(+new Date()).substring(0,16);  // 16位随机串
-
-                let parameter = `epnonestats=${epnonestats}&type=enter&source=${platform}&deviceid=${deviceid}&uid=${userId}&p1=${p1}&p2=${p2}`;
+                // var epnonestats = +new Date() + '_' + (Math.floor(Math.random() * 90) + 10) //btoa(+new Date()).substring(0,16);  // 16位随机串
+                var epnonestats = +new Date();
+                let parameter = `type=enter&source=${platform}&deviceid=${deviceid}&uid=${userId}&p1=${p1}`;
+                pArr.forEach(item => {
+                    if (o.hasOwnProperty(item)) {
+                        parameter += `&${item}=${o[item]}`;
+                        delete o[item];
+                    }
+                })
                 for (let i in o) {
-                    parameter += `&${i}=${o[i]}`
+                    parameter += `&${i}=${o[i]}`;
                 }
+                parameter += `&ts=${epnonestats}`;
                 //发送
                 this.send(parameter, ele => {
                     if (ele.ok) {
-                        // this.alert(parameter)
                         clearTimeout(time)
                     }
                 })
@@ -286,6 +297,8 @@ export default {
             }, 300)
 
         },
+
+        // 大数据统计
         //  事件类
         event(o) {
             var userId = '';
@@ -345,6 +358,13 @@ export default {
                 type: 'json',
                 url: 'https://stats.360che.com/app_tj.htm?' + parameter
             }, callback)
+        },
+        isIos () {
+            if(weex.config.env && weex.config.env.platform && weex.config.env.platform == 'iOS') {
+                return true
+            } else {
+                return false
+            }
         }
     },
     created() {

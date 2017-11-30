@@ -33,7 +33,7 @@
                         transform: 'translate(0,0)',
                     },
                     duration: 300, //ms
-                    timingFunction: 'linear',
+                    timingFunction: 'ease-out',
                     delay: 0 //ms
                 })
             });

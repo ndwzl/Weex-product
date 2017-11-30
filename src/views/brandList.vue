@@ -4,11 +4,11 @@
             <header>
                 <nav-bar @historyShow="historyShow"></nav-bar>
             </header>
-            <cell>
+            <cell ref="#">
                 <recommend-list :recommendList="recommendList" @SidebarShow="SidebarShow" v-if="!errorButton"></recommend-list>
             </cell>
-            <cell v-for="(brandListInfo,index) in brandList" :ref="indexNav[index]">
-                <brand-list :brandListInfo="brandListInfo" :index="indexNav[index]" @SidebarShow="SidebarShow"></brand-list>
+            <cell v-for="(brandListInfo,index) in brandList" :ref="indexNav[index+1]">
+                <brand-list :brandListInfo="brandListInfo" :index="indexNav[index+1]" @SidebarShow="SidebarShow"></brand-list>
             </cell>
             <cell>
                 <other-brandList v-if="moreBrandShow" :otherBrandList="otherBrandList" @SidebarShow="SidebarShow"></other-brandList>
@@ -16,7 +16,7 @@
         </list>
 
         <!--nav导航-->
-        <index-nav :indexNav="indexNav" @anchor="anchor"></index-nav>
+        <index-nav :indexNav="indexNav" @anchor="anchor" @anchorNoAnimation="anchorNoAnimation"></index-nav>
 
         <!--sidebar-->
         <div :class="['sidebar',showSidebar?'sidebar-visible':'']">
@@ -183,7 +183,15 @@
 
             //点击锚点跳转
             anchor(index){
-                dom.scrollToElement(this.$refs[index][0], {offset: 0})
+                let ele = this.$refs[index]
+                if (index !== '#') ele = ele[0]
+                dom.scrollToElement(ele, { offset: -88 })
+            },
+            // 滑动锚点跳转
+            anchorNoAnimation (index) {
+                let ele = this.$refs[index]
+                if (index !== '#') ele = ele[0]
+                dom.scrollToElement(ele, { offset: -88, animated: false })
             },
             //sidebar内容点击跳转
             goInfo(ele){
@@ -408,7 +416,7 @@
                         transform: 'translate(750px,0)'
                     },
                     duration: 300, //ms
-                    timingFunction: 'linear',
+                    timingFunction: 'ease-out',
                     delay: 0 //ms
                 }, () => {
                     //隐藏sidebar
@@ -448,6 +456,7 @@
                         //品牌列表
                         this.brandList = data.data.brandList;
                         //nav导航
+                        data.data.letter.unshift('#')
                         this.indexNav = data.data.letter;
                         //更多品牌列表
                         this.otherBrandList = data.data.otherBrandList;

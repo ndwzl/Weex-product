@@ -325,7 +325,7 @@
                 }else{
                     ele = this.$refs[index][0]
                 }
-                dom.scrollToElement(ele, {offset: -200})
+                dom.scrollToElement(ele, {offset: -288})
                 this.classifyPop = false;
             },
             //询底价

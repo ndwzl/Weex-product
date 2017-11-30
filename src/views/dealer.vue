@@ -109,7 +109,7 @@
                 this.goBack();
             });
 
-            if(weex.config.env.platform == 'iOS'){
+            if(weex.config.env && weex.config.env.platform == 'iOS'){
                 this.iosTop = true;
             }
             //获取询底价信息

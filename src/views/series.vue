@@ -1,10 +1,11 @@
 <template>
     <div class="series">
         <div v-if="iosTop" class="ios-top"></div>
+
         <list style="flex: 1">
             <header ref="goTop">
                 <!--标题-->
-                <title :titleName="titleName" :shareData="shareData" :seriesId="seriesInfo.F_SeriesId"></title>
+                <title needShare="1" @shareToggle="shareShow" :titleName="titleName" :seriesId="seriesInfo.F_SeriesId" :el="el"></title>
             </header>
             <cell>
                 <!--nav导航-->
@@ -36,6 +37,8 @@
         <!--</keep-alive>-->
         <!--切换地区弹层-->
         <switch-location-pop v-if="switchLocationShow" :cityName="myRegion.cityName" @cancelSwitch="cancelSwitch" @okSwitch="okSwitch"></switch-location-pop>
+        <!-- weex分享 -->
+        <weexShare :shareParams="shareData" :showShare="showShare" @shareCallBack="shareCallBack"></weexShare>
     </div>
 </template>
 
@@ -70,6 +73,7 @@
                 seriesInfo:{},
                 //导航列表
                 navInfo:'series',
+                showShare: false,
                 //分享数据
                 shareData:{
                     title: "", // 分享标题
@@ -177,10 +181,22 @@
                 //统计
                 el:'产品库-子类车系综述页',
                 // 更新modelTypeList组件信息
-                modelTypeListUpdate: true
+                modelTypeListUpdate: true,
             }
         },
         methods:{
+            shareShow () {
+                this.showShare = true
+            },
+            // 分享的回调
+            shareCallBack (data) {
+                // 分享成功
+                if (data.status === '0') {
+                    const platformList = ['微信好友', '微信朋友圈', 'QQ好友', 'QQ空间', '新浪微博', '复制链接']
+                    const platform = platformList[data.platform]
+                    this.eventGa(weex.config.deviceId, '分享产品库成功', this.el, platform)
+                }
+            },
             getSeriesData(){
 
                 //发送PV
@@ -433,7 +449,6 @@
         },
         created(){
 
-
             //监听用户点击安卓物理返回键
             globalEvent && globalEvent.addEventListener("onRespondNativeBack",(e) => {
                 this.goBack();
@@ -501,7 +516,7 @@
             selectLocation,
             secondHand,
             footerInfo,
-            switchLocationPop
+            switchLocationPop,
         },
         mounted(){
         }

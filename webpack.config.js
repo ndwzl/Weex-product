@@ -60,7 +60,11 @@ function getBaseConfig() {
             //个人信息声明页
             personalInfo:path.resolve('./build/personalInfo.js'),
             //对比页面
-            contrast:path.resolve('./build/contrast.js')
+            contrast:path.resolve('./build/contrast.js'),
+            //筛选首页
+            filter: path.resolve('./build/filter.js'),
+            //筛选结果页
+            filterResult: path.resolve('./build/filterResult.js'),
         },
         output: {
             path: 'dist',
