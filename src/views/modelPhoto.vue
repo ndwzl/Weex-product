@@ -2,11 +2,11 @@
     <div :class="['model-photo',!footerInfo.footerPrice? 'no-padding' : '']">
         <div v-if="iosTop" class="ios-top"></div>
         <!--标题-->
-        <title :titleName="titleName" v-if="notImg" ></title>
+		<title :titleName="titleName" v-if="notImg" ></title>
         <list v-if="!notImg" style="flex: 1" @loadmore="fetch" loadmoreoffset="100" ref="list">
             <header>
                  <!--标题-->
-                <title :titleName="titleName"></title>
+                <title @shareToggle="shareShow" :titleName="titleName" :shareData="shareData" :el="el"></title>
             </header>
             <cell>
                 <!--推荐车型-->
@@ -46,12 +46,13 @@
         <switch-model v-if="switchModelData.paramName || emptyList" :switchModelPop="switchModelPop" :switchModelData="switchModelData" @goSwitchModel="goSwitchModel" @switchModelShow="switchModelShow" :imgSwitchModel="imgSwitchModel"></switch-model>
         <!--底层询底价浮层-->
         <footerInfo :footerInfo="footerInfo" :el="el"></footerInfo>
+		<!-- weex分享 -->
+        <weexShare :shareParams="shareData" :showShare="showShare" @shareCallBack="shareCallBack"></weexShare>
     </div>
 </template>
 
 <script type="text/babel">
     import title from '../components/title.vue'
-    import nav from '../components/nav.vue'
     import photoAlbum from '../components/photoAlbum.vue'
     import switchModel from '../components/switchModel.vue'
     import load from '../components/load.vue'
@@ -63,6 +64,13 @@
     let modal = weex.requireModule('modal')
     let globalEvent = weex.requireModule('globalEvent');
     export default {
+        components: {
+            title,
+            photoAlbum,
+            switchModel,
+            load,
+            footerInfo
+        },
         data(){
             return {
                 //标题名称
@@ -132,18 +140,25 @@
                 iosTop:false,
                 //统计
                 el:'产品库-车型图片列表页',
-                loadimg:true,
+				loadimg:true,
+				showShare: false,
+				// 分享数据
+				shareData: {}
             }
         },
         created(){
+            //前端监控
+            this.weexLogger('车型图片列表页')
+
+
+            this.showLoading()
+
             //监听用户点击安卓物理返回键
             globalEvent && globalEvent.addEventListener("onRespondNativeBack",(e) => {
                 this.goBack();
             });
 
-            if(weex.config.env.platform == 'iOS'){
-                this.iosTop = true;
-            }
+            this.iosTop = this.isIos()
 
             //获取询底价信息
             storage.getItem('modelFooterInfo',ele => {
@@ -188,8 +203,16 @@
                             this.detailed(this.photoData.typeId)
                         }else{
                             //请求图片页信息
-                            this.getData(this.ajaxUrl() + '/index.php?r=api/getweekpicturelist&subCateId=' + this.seriesInfo.F_SubCategoryId + '&seriesId=' + this.seriesInfo.F_SeriesId, ele => {
+                            this.getData(this.ajaxUrl() + '/index.php?r=api/getweekpicturelist&subCateId=' + this.seriesInfo.F_SubCategoryId + '&seriesId=' + this.seriesInfo.F_SeriesId + '&special=2', ele => {
                                 if (ele.ok && ele.data.info == 'ok') {
+									//分享数据
+									let shareData = ele.data.share
+									this.shareData = {
+										title: shareData.h1,
+										desc: shareData.title,
+										link: shareData.url,
+										imgUrl: shareData.img,
+									}
                                     //标题
                                     this.titleName = ele.data.title;
                                     //车型名称
@@ -206,6 +229,7 @@
                                     this.titleName = ele.data.allName;
                                     this.notImg = true;
                                 }
+                                this.hideLoading()
                             });
                         }
                     });
@@ -250,6 +274,18 @@
 
         },
         methods: {
+			shareCallBack (data) {
+                // 分享成功
+                if (data.status === '0') {
+                    const platformList = ['微信好友', '微信朋友圈', 'QQ好友', 'QQ空间', '新浪微博', '复制链接']
+                    const platform = platformList[data.platform]
+                    this.eventGa(weex.config.deviceId, '分享产品库成功', this.el, platform)
+                }
+			},
+			// 分享弹层显示
+            shareShow () {
+                this.showShare = true
+            },
             alert(text){
                 modal.alert({
                     message:text,
@@ -276,8 +312,16 @@
                 this.photoData.page = 2;
                 console.log(this.ProductId)
                 //请求图片页信息
-                this.getData(this.ajaxUrl() + '/index.php?r=api/getweekpicturelist&subCateId=' + this.seriesInfo.F_SubCategoryId + '&seriesId=' + this.seriesInfo.F_SeriesId + '&typeId=' + typeId + '&productId=' + this.ProductId, ele => {
+                this.getData(this.ajaxUrl() + '/index.php?r=api/getweekpicturelist&subCateId=' + this.seriesInfo.F_SubCategoryId + '&seriesId=' + this.seriesInfo.F_SeriesId + '&typeId=' + typeId + '&productId=' + this.ProductId + '&special=2', ele => {
                     if (ele.ok && ele.data.info == 'ok') {
+						//分享数据
+						let shareData = ele.data.share
+						this.shareData = {
+							title: shareData.h1,
+							desc: shareData.title,
+							link: shareData.url,
+							imgUrl: shareData.img,
+						}
                         if(!this.titleName){
                             //车型标题
                             this.titleName = ele.data.allName + '图片';
@@ -322,6 +366,7 @@
                         }
                         this.notImg = true;
                     }
+                    this.hideLoading()
                 })
             },
             //换车型弹框
@@ -389,7 +434,6 @@
                 })
             }
         },
-        components: {title, nav, photoAlbum, switchModel,load,footerInfo}
     }
 </script>
 

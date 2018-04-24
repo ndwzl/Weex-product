@@ -1,7 +1,7 @@
 <template>
     <div class="filter-result">
         <div v-if="iosTop" class="ios-top"></div>
-        <list @scroll="scroll" loadmoreoffset="88" offset-accuracy="40" ref="list">
+        <list @scroll="scroll" loadmoreoffset="88" offset-accuracy="40" ref="list" @loadmore="loadmore">
             <header ref="header">
                 <!--页面标题-->
                 <title :titleName="info.h1" :reset="true" @resetFilter="resetFilter"></title>
@@ -43,7 +43,7 @@
                 </div>
                 <div class="result-list">
                     <div :class="['series-item', index ? '' : 'item-first' ]" v-for="(result, index) in info.seriesList" v-if="resultHasSeries" @click="getSeriesSiderbarData(result.subId, result.id)">
-                        <image class="result-pictrue" placeholder="https://s.kcimg.cn/wap/images/detail/productApp/placeholder.png" :src="result.src" resize="cover"></image>
+                        <image class="result-pictrue" :placeholder="`${DefaultImgPath}placeholder.jpg`" :src="result.src" resize="cover"></image>
                         <div class="result-cont">
                             <div class="result-cont-title">
                                 <text class="result-cont-title-text">{{result.name}}</text>
@@ -63,7 +63,7 @@
                     </div>
 
                     <div :class="['series-item', index ? '' : 'item-first' ]" v-for="(result, index) in info.productList" v-if="!resultHasSeries" @click="goModelPage(result.id, result.sId)">
-                        <image class="result-pictrue" placeholder="https://s.kcimg.cn/wap/images/detail/productApp/placeholder.png" :src="result.src" resize="cover"></image>
+                        <image class="result-pictrue" :placeholder="`${DefaultImgPath}placeholder.jpg`" :src="result.src" resize="cover"></image>
                         <div class="result-cont">
                             <div class="result-cont-title model-title">
                                 <text class="result-cont-title-text model-title-text">{{result.name}}</text>
@@ -91,16 +91,18 @@
         page="filterResult"></sidebar>
         <!-- 品牌选择侧边栏 -->
         <brand-list-sidebar
-        v-if="brandSidebar"
         @brandSidebarChange="brandSidebarChange"
         @selectType="selectType"
+        :show="brandSidebar"
         :data="brandListSidebarData"
-        :isIos="iosTop"
         :brandUnlimit="brandUnlimit"></brand-list-sidebar>
         <!-- 车系侧边栏 -->
         <series-sidebar
         v-if="seriesSidebar"
+        @resetOrder="resetOrder"
         @seriesSidebarChange="seriesSidebarChange"
+        @updateOrder="updateOrder"
+        :orderIcon="seriesSidebarOrderIcon"
         :data="seriesSiderbarData"
         :isIos="iosTop"></series-sidebar>
         <!-- 回到顶部 -->
@@ -247,15 +249,28 @@
                 hasTonnage: false,
                 //统计
                 // el: '产品库-子类车系综述页',
-                // 设备高度
-                deviceHeight: 0,
                 // loadmore的节流控制参数 default false 不节流
                 throttle: false,
                 // 缓存跳转车型页用的cateInfo对象里面的参数
                 cateInfo: {},
+                // 缓存请求车系侧边栏的排序的参数
+                lastSidebarOrderParams: {},
+                // 车系侧边栏排序的图片名
+                seriesSidebarOrderIcon: 'power-default.png'
             }
         },
         methods:{
+            // 车系侧边栏reset排序
+            resetOrder () {
+                this.seriesSidebarOrderIcon = 'power-default.png'
+            },
+            // 车系侧边栏更新排序方式
+            updateOrder (order, icon) {
+                this.seriesSidebarOrderIcon = icon
+                this.getSeriesSiderbarData(this.lastSidebarOrderParams.subCateId, this.lastSidebarOrderParams.seriesId, order)
+                // 发送ga统计: 车系弹层点击马力
+                this.eventGa(weex.config.deviceId, '产品库-筛选结果页', '点击马力', '右侧弹层')
+            },
             // 获取筛选结果页面数据
             getFilterResultData () {
                 // 读取storage 取出请求参数
@@ -266,6 +281,13 @@
                             case 'subCate':
                                 // 是子类筛选 设置默认子类id
                                 this.subCateId = data.id
+                                if (data.num) {
+                                    this.notBrandParams.push({
+                                        'id': data.num,
+                                        //此时用不到index 赋值为-1 仅仅供requestInitApi使用id
+                                        'index': -1
+                                    })
+                                }
                                 break;
                             case 'brand':
                                 // 品牌筛选 设置默认品牌
@@ -286,8 +308,9 @@
             },
             // 请求初次加载页面的数据（或者点击用途类型）
             requestInitApi () {
+                this.showLoading()
                 // 根据获取筛选结果页面数据
-                this.getData(`${this.ajaxUrl()}/index.php?r=weex/list&subCateId=${this.subCateId}&brandId=${this.brandId}&paramId=${this.getParamId()}&ts=${+new Date()}`, res => {
+                this.getData(`${this.ajaxUrl()}/index.php?r=weex/list&subCateId=${this.subCateId}&brandId=${this.brandId}&paramId=${this.getParamId()}`, res => {
                     if (res.ok) {
                         // 定义映射data中的参数列表、品牌名、参数名、车系列表、子类id
                         let { pageTotal, cateInfo, paramList, brandName, paramName, seriesList, subCateId } = res.data
@@ -324,7 +347,7 @@
                         // 如果是价格筛选要设置价格
                         if (this.notBrandParams[0] && this.notBrandParams[0].index < 0) {
                             paramList.forEach((item, index) => {
-                                if (item.name === "价格") {
+                                if (item.name === "价格" && paramName) {
                                     item.name = paramName
                                     item.selected = true
                                 }
@@ -340,13 +363,19 @@
                         this.resultHasSeries = seriesList.length ? true : false
                         // 渲染时才计算高度
                         this.showType && this.computeTypeHeight(paramList)
+                        // 当点击用途类别的时候可能导致原本为展开提示没有发生变化
+                        if (this.filterTypeHeight > this.heightMin) {
+                            this.showMoreType = '收起'
+                            this.showMoreTypeSrc = 'https://s.kcimg.cn/wap/images/detail/productApp/packup.png'
+                        }
                         this.info = res.data
                         // 发送GA统计
                         this.sendGA()
                         // 发送大数据统计
                         this.sendBigData()
-
                     }
+                    // 关闭大loading
+                    this.hideLoading()
                 })
             },
             // 计算选择属性部分的高度
@@ -386,7 +415,7 @@
                 // 用途类别
                 if (this.hasPurpose && !index) {
                     // 请求用途类别数据
-                    this.getData(`${this.ajaxUrl()}/index.php?r=weex/list/cate&brandId=${this.brandId}&paramId=${this.getParamId()}&ts=${+new Date()}`, res => {
+                    this.getData(`${this.ajaxUrl()}/index.php?r=weex/list/cate&brandId=${this.brandId}&paramId=${this.getParamId()}`, res => {
                         if (res.ok) {
                             let list = res.data
                             // 添加不限选项
@@ -421,7 +450,7 @@
 
                 if (index === brandIndex) {
                     // 请求品牌子类数据
-                    this.getData(`${this.ajaxUrl()}/index.php?r=weex/list/brand-filter&subCateId=${this.subCateId}&paramId=${this.getParamId()}&ts=${+new Date()}`, res => {
+                    this.getData(`${this.ajaxUrl()}/index.php?r=weex/list/brand-filter&subCateId=${this.subCateId}&paramId=${this.getParamId()}`, res => {
                         if (res.ok) {
                             // 默认品牌是不限的
                             this.brandUnlimit = true
@@ -444,7 +473,7 @@
                     })
                 } else {
                     // 请求其他子类数据
-                    this.getData(`${this.ajaxUrl()}/index.php?r=weex/list/param-filter&subCateId=${this.subCateId}&fid=${fid}&paramId=${this.getParamId()}&brandId=${this.brandId}&ts=${+new Date()}`, res => {
+                    this.getData(`${this.ajaxUrl()}/index.php?r=weex/list/param-filter&subCateId=${this.subCateId}&fid=${fid}&paramId=${this.getParamId()}&brandId=${this.brandId}`, res => {
                         if (res.ok) {
                             let { params } = res.data
                             // 添加不限选项
@@ -524,16 +553,6 @@
                     this.updateData()
                 }
             },
-            // loadmoreData () {
-            //     this.$refs.list.resetLoadmore()
-            //     // 请求锁关闭时候不可以请求
-            //     if (!this.needLoading || !this.requestLock) {
-            //         return
-            //     }
-            //     this.requestLock = false
-            //     this.loading = true
-            //     this.updateData(true)
-            // },
             // 更新筛选结果 非滚动加载的要重置this.currentPage = 1
             updateData (isLoadmore = false) {
                 if (isLoadmore) {
@@ -541,7 +560,7 @@
                 } else {
                     this.currentPage = 1
                 }
-                const url = `${this.ajaxUrl()}/index.php?r=weex/list&isList=1&subCateId=${this.subCateId}&paramId=${this.getParamId()}&brandId=${this.brandId}&order=${this.order}&page=${this.currentPage}&ts=${+new Date()}`
+                const url = `${this.ajaxUrl()}/index.php?r=weex/list&isList=1&subCateId=${this.subCateId}&paramId=${this.getParamId()}&brandId=${this.brandId}&order=${this.order}&page=${this.currentPage}`
                 this.getData(url, res => {
                     if (res.ok) {
                         const { cateInfo, total, h1, seriesList, productList, pageTotal } = res.data
@@ -603,14 +622,19 @@
                 this.updateData()
             },
             // 获取车系弹层所需数据
-            getSeriesSiderbarData (subCateId, seriesId) {
-                this.getData(`${this.ajaxUrl()}/index.php?r=weex/list/product&subId=${subCateId}&seriesId=${seriesId}&paramId=${this.getParamId()}&brandId=${this.brandId}&ts=${+new Date()}`, res => {
+            getSeriesSiderbarData (subCateId, seriesId, order = '') {
+                const originalOrder = order
+                if (!order) {
+                    this.lastSidebarOrderParams = {subCateId, seriesId}
+                }
+                this.getData(`${this.ajaxUrl()}/index.php?r=weex/list/product&subId=${subCateId}&seriesId=${seriesId}&paramId=${this.getParamId()}&brandId=${this.brandId}&order=${order}`, res => {
                     if (res.ok) {
                         let priceScope = res.data.info.priceScope
                         for (let key in priceScope) {
                             priceScope[key] = Number(priceScope[key])
                         }
-                        this.seriesSidebarChange()
+                        // 车系侧边栏的操作不能关闭弹层
+                        originalOrder || this.seriesSidebarChange()
                         this.seriesSiderbarData = res.data
                         // 发送大数据统计: 车系弹层
                         this.sendBigData([
@@ -639,12 +663,10 @@
                     this.showGoTop = false
                 }
                 if (!offsetY) return false
-                const listHeight = Number(e.contentSize.height)
-                if (listHeight - offsetY <= this.deviceHeight) {
-                    this.loadmore()
-                }
             },
             loadmore () {
+                // 重置loadmore
+                this.$refs.list.resetLoadmore()
                 if (this.throttle) {
                     return
                 }
@@ -712,7 +734,9 @@
             },
         },
         created () {
-            if (weex.config.env) this.deviceHeight = Number(weex.config.env.deviceHeight)
+            //前端监控
+            this.weexLogger('筛选结果页')
+
             //获取筛选数据
             this.getFilterResultData()
 
@@ -722,7 +746,7 @@
             })
 
             //如果是ios系统的话
-            if(weex.config.env && weex.config.env.platform && weex.config.env.platform == 'iOS'){
+            if(this.isIos()){
                 //头部的高度
                 this.iosTop = true
             }

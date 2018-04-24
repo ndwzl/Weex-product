@@ -66,17 +66,17 @@
                 sidebar: false,
                 // 子类弹层数据
                 sidebarData: {
-                    subCateList: [
-                        {
-                            id: "61",
-                            name: "发动机",
-                        },
-                        {
-                            id: "62",
-                            name: "变速箱",
-                        },
-                    ],
-                    cateName : "配件"
+                    // subCateList: [
+                    //     {
+                    //         id: "61",
+                    //         name: "发动机",
+                    //     },
+                    //     {
+                    //         id: "62",
+                    //         name: "变速箱",
+                    //     },
+                    // ],
+                    // cateName : "配件"
                 }
                 //统计
                 // el: '产品库-子类车系综述页',
@@ -93,7 +93,21 @@
                     // 更新缓存
                     this.getData(`${this.ajaxUrl()}/index.php?r=weex/index`, res => {
                         if (res.ok) {
-                            this.info = res.data
+                            let resData = res.data
+                            for (let i in resData) {
+                                switch (resData[i].length%4) {
+                                    case 2:
+                                        resData[i].push({isnull:1})
+                                        resData[i].push({isnull:1})
+                                        break
+                                    case 3:
+                                        resData[i].push({isnull:1})
+                                        break
+                                    default:
+                                        break
+                                }
+                            }
+                            this.info = resData
                             storage.setItem('filterData', JSON.stringify(res.data))
                         }
                     })
@@ -134,6 +148,8 @@
             }
         },
         created () {
+            //前端监控
+            this.weexLogger('筛选页')
             //获取筛选数据
             this.getFilterData()
 
@@ -143,7 +159,7 @@
             })
 
             //如果是ios系统的话
-            if(weex.config.env && weex.config.env.platform && weex.config.env.platform == 'iOS'){
+            if(this.isIos()){
                 //头部的高度
                 this.iosTop = true
             }

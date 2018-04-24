@@ -2,9 +2,9 @@
     <div class="filter-result">
         <div :class="['button', item.selected ? 'selected' : '']" v-for="(item, index) in list" @click="showSidebar(item, index)">
 		    <text :class="['button-text', item.selected ? 'selected-button-text' : '']">{{item.name}}</text>
-            <image src="https://s.kcimg.cn/wap/images/detail/productApp/filter-selected.png" v-if="item.selected" class="more"></image>
+            <image :src="DefaultImgPath + 'filter-selected.png' " v-if="item.selected" class="more"></image>
             <!-- <text style='font-family:iconfont4;font-size:20;color:#1571e5'>&#xe695;</text> -->
-            <image src="https://s.kcimg.cn/wap/images/detail/productApp/filter-more.png" v-else class="more"></image>
+            <image :src="DefaultImgPath + 'filter-more.png' " v-else class="more"></image>
             <!-- <text style='font-family:iconfont4;font-size:20;color:#B8C0D0'>&#xe695;</text> -->
 		</div>
     </div>

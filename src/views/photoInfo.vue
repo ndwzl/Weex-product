@@ -1,7 +1,7 @@
 <template>
     <div class="photo-info">
         <div v-if="iosTop" class="ios-top"></div>
-        <title :titleName="titleName" black="black" :imgInfo="imgInfo" @goback="goback"></title>
+        <title @shareToggle="shareShow" :titleName="titleName" :photoShare="1" :shareData="shareData" black="black" :imgInfo="imgInfo" @goback="goback"></title>
         <!--<div class="img-title" v-if="!imgInfo">-->
 
         <!--</div>-->
@@ -14,29 +14,32 @@
 
         <!--</div>-->
         <div class="img-list">
-            <div class="img-wrapper">
-                <img-slider v-if="imgList.data.length" :imgList="imgList.data" :index="index" @slide="slide" @goImgInfo="goImgInfo"></img-slider>
-            </div>
-
+            <!-- <div class="indicator" @click="saveImgToLocal"> -->
             <div class="indicator">
                 <text class="current" style="color:#fff;">{{-index + 1}}</text>
                 <text class='between'> / </text>
                 <text class="total">{{total}}</text>
             </div>
-        </div>
-        <div class="footer-bar" v-if="imgList.data.length && !imgInfo">
-            <div class="truck-info">
-                <text class="truck-name" v-if="imgList.data[-index] && imgList.data[-index].name">{{imgList.data[-index].name}}</text>
-                <div class="truck-price">
-                    <text class="price-text">厂商指导价：</text>
-                    <text class="price-text" v-if="imgList.data[-index] && imgList.data[-index].price">{{imgList.data[-index].price > 0 ? imgList.data[-index].price + '万' : '暂无'}}</text>
-                    <text class="price-text" v-else>暂无</text>
+            <div class="img-wrapper">
+                <img-slider v-if="imgList.data.length" :imgList="imgList.data" :index="index" @slide="slide" @goImgInfo="goImgInfo"></img-slider>
+            </div>
+            <div class="desc" v-if="imgList.data.length && !imgInfo">
+                <div class="truck-info">
+                    <text class="truck-name" v-if="imgList.data[-index] && imgList.data[-index].name">{{imgList.data[-index].name}}</text>
+                    <div class="truck-price">
+                        <text class="price-text">厂商指导价：</text>
+                        <text class="price-text" v-if="imgList.data[-index] && imgList.data[-index].price">{{imgList.data[-index].price > 0 ? imgList.data[-index].price + '万' : '暂无'}}</text>
+                        <text class="price-text" v-else>暂无</text>
+                    </div>
                 </div>
             </div>
-            <div class="footer-price" v-if="imgList.data[-index] && imgList.data[-index].isMake != 4" @click="goFooterPrice(imgList.data[-index].F_ProductId)">
-                <text class="footer-price-text">询底价</text>
-            </div>
         </div>
+        
+        <div class="footer-price" v-if="imgList.data[-index] && imgList.data[-index].isMake != 4" @click="goFooterPrice(imgList.data[-index].F_ProductId)">
+            <text class="footer-price-text">询底价</text>
+        </div>
+        <!-- weex分享 -->
+        <weexShare :shareParams="shareData" :showShare="showShare" @shareCallBack="shareCallBack" :isPhotoInfo="shareStatus"></weexShare>
     </div>
 </template>
 
@@ -77,9 +80,22 @@
                 open:true,
                 //苹果头部白条
                 iosTop:false,
+                // ga最后一个参数
+                dt: '',
+                // 分享显示隐藏控制器
+                showShare: false,
+                // 分享所需数据
+				shareData: {},
+				// 分享的状态 0 开始 1 获取到分享数据
+				shareStatus: '0',
+				// 分享锁
+				shareLock: true
             }
         },
         created(){
+            //前端监控
+            this.weexLogger('图片详情页')
+
             //显示加载loading
             this.showLoading();
 
@@ -95,11 +111,7 @@
                 }
             });
 
-            //如果是ios系统的话
-            if(weex.config.env.platform == 'iOS'){
-                //头部的高度
-                this.iosTop = true;
-            }
+            this.iosTop = this.isIos()
 
             //获取车型id
             storage.getItem('imgProductId',ele => {
@@ -166,30 +178,34 @@
             })
         },
         methods:{
+            shareCallBack (data) {
+                // 分享成功
+                if (data.status === '0') {
+                    const platformList = ['微信好友', '微信朋友圈', 'QQ好友', 'QQ空间', '新浪微博', '复制链接']
+					const platform = platformList[data.platform]
+					
+                    this.eventGa(weex.config.deviceId, '分享产品库成功', '产品库-图片最终页', platform)
+                }
+            },
+            // 分享弹层显示
+            shareShow () {
+				if (!this.shareLock) {
+					return false
+				}
+				this.shareLock = true
+				this.updateShareData().then(() => this.showShare = true)
+            },
+            // 保存图片到本地--不生效
+            saveImgToLocal () {
+                const imgId = this.imgList.data[Math.abs(this.index)].F_ImageId
+                const image = this.$refs[`img${imgId}`][0]
+                // this.alert(`img${imgId}`)
+                image.save(result => {
+                    // this.alert(JSON.stringify(result))
+                })
+            },
             //图片切换
             slide(direction){
-
-                //发送PV
-                storage.getItem('p4',p4 => {
-                    if(p4.result == 'success'){
-                        this.p4 = p4.data;
-                        storage.getItem('p5',p5 => {
-                            if(p5.result == 'success'){
-                                this.p5 = p5.data;
-                                let o = {
-                                    'p3': p4.data,
-                                    'p4': 2,
-                                    'p5': p5.data,
-                                    'p7':this.imgDataList.F_ImageId
-                                }
-                                if(this.productId != 0){
-                                    o.p6 = this.productId
-                                }
-                                this.collect(o)
-                            }
-                        })
-                    }
-                })
 
                 //向又
                 if(direction == 'right'){
@@ -212,32 +228,78 @@
                     ++this.index;
 //                    this.alert('zuo')
                 }
-            },
+				
+                //发送PV
+                storage.getItem('p4',p4 => {
+                    if(p4.result == 'success'){
+                        this.p4 = p4.data;
+                        storage.getItem('p5',p5 => {
+                            if(p5.result == 'success'){
+                                this.p5 = p5.data;
+                                const imgId = this.imgList.data[Math.abs(this.index)].F_ImageId
+                                let o = {
+                                    'p3': p4.data,
+                                    'p4': 2,
+                                    'p5': p5.data,
+                                    'p7': imgId
+                                    // 'p7':this.imgDataList.F_ImageId
+                                }
+                                if(this.productId != 0){
+                                    o.p6 = this.productId
+                                }
+                                this.collect(o)
+                            }
+                        })
+                    }
+                })
+			},
+			// 更新分享所用数据
+			updateShareData () {
+				return new Promise((resolve, reject) => {
+					const imgId = this.imgList.data[Math.abs(this.index)].F_ImageId
+					let ajaxUrl = `${this.ajaxUrl()}/index.php?r=api/getweekpicturedetail&imageId=${imgId}&typeId=${this.imgDataList.typeId}&page=${this.page}`
+					if(this.productId){
+						ajaxUrl += `&productId=${this.productId}`
+					}
+					this.getData(ajaxUrl, res => {
+						this.shareLock = true
+						if (res.ok && res.data.info === 'ok') {
+							let shareData = res.data.share
+							shareData.url += `#p${Math.abs(this.index) + 1}`
+							//分享数据
+							this.shareData = {
+								title: shareData.h1,
+								desc: shareData.title,
+								link: shareData.url,
+								imgUrl: shareData.img,
+							}
+							resolve()
+						}
+					})
+				})
+			},
             //请求图片详情
             getImgData(){
-                let ajaxUrl = this.ajaxUrl() + '/index.php?r=api/getweekpicturedetail&imageId=' + this.imgDataList.F_ImageId + '&typeId=' + this.imgDataList.typeId + '&page=' + this.page;
+                let ajaxUrl = `${this.ajaxUrl()}/index.php?r=api/getweekpicturedetail&imageId=${this.imgDataList.F_ImageId}&typeId=${this.imgDataList.typeId}&page=${this.page}`
                 if(this.productId){
-                   ajaxUrl += '&productId=' + this.productId;
+                   ajaxUrl += `&productId=${this.productId}`
                 }
                 this.getData(ajaxUrl,ele => {
                     if(ele.ok && ele.data.info == 'ok'){
-
-                        //标题
-//                        this.alert(this.page)
-
                         //只有没有标题的时候运行一次
 //                        if(!this.titleName){
                             //车型
                             if(ele.data.proName){
                                 this.pageType = '产品库-车型图片最终页'
                                 this.titleName = ele.data.proName + ele.data.typeName + '图片'
+                                this.dt = `${ele.data.proName}图片`
                                 //发送GA
-                                this.goUrlGa(weex.config.deviceId,'product.m.360che.com','产品库-访问车型图片最终页',this.titleName)
+                                this.goUrlGa(weex.config.deviceId,'product.m.360che.com','产品库-车型图片最终页',this.dt)
                             }else{//车系
                                 this.pageType = '产品库-子类车系图片最终页'
-                                this.titleName = ele.data.title;
+                                this.titleName = this.dt = ele.data.title
                                 //发送GA
-                                this.goUrlGa(weex.config.deviceId,'product.m.360che.com','产品库-子类车系图片最终页',this.titleName)
+                                this.goUrlGa(weex.config.deviceId,'product.m.360che.com','产品库-子类车系图片最终页',this.dt)
                             }
 //                        }
 //                        this.alert(JSON.stringify(ele.data.data))
@@ -312,52 +374,43 @@
     .img-title{
         height:90px;
     }
-    .footer-bar{
-        position:fixed;
-        left:0;
-        right:0;
-        bottom:0;
-        height:120px;
-        padding-right:28px;
-        align-items: center;
-        flex-direction: row;
-        background-color: #111;
-    }
     .truck-info{
         flex: 1;
-        padding-left:30px;
+		align-items: center;
     }
     .footer-price{
-        width: 120px;
-        height: 64px;
-        font-size: 14px;
+        position:fixed;
+        left:24px;
+        right:24px;
+        bottom:24px;
+        width: 702px;
+        height: 100px;
         justify-content: center;
         align-items: center;
+        background-color: #FF6600;
         border-top-left-radius: 4px;
         border-top-right-radius: 4px;
         border-bottom-left-radius: 4px;
         border-bottom-right-radius: 4px;
-        background-color: #1571e5;
     }
     .footer-price-text{
         color:#fff;
-        font-size:28px;
+        font-size:32px;
     }
     .truck-name{
         color: #fff;
-        font-size:28px;
+        font-size:32px;
     }
     .truck-price{
+		flex: 1;
         margin-top: 10px;
         flex-direction: row;
+        justify-content: center;
     }
     .price-text{
         color:#fff;
         font-size:24px;
     }
-
-
-
     .photo-info{
         background-color:#111;
     }
@@ -393,7 +446,6 @@
     }
     .img-list{
         flex:1;
-        justify-content: center;
         background-color: #222;
     }
     .img-wrapper{
@@ -406,9 +458,15 @@
     }
     .indicator{
         flex-direction: row;
-        margin-top:80px;
+        margin-top: 83px;
+        margin-bottom: 36px;
+        height: 40px;
         justify-content: center;
         align-items: flex-end;
+    }
+    .desc {
+        margin-top: 84px;
+        align-items: center;
     }
     .current{
         color:#fff;

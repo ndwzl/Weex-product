@@ -13,8 +13,11 @@
                     <!--</div>-->
                 <!--</scroller>-->
             </div>
-            <div v-if="needShare" class="share" @click="share">
+            <div v-if="!photoShare && shareData" class="share" @click="share">
                 <text class="share-text">分享</text>
+            </div>
+            <div v-if="photoShare && !imgInfo" class="photo-share" @click="share">
+                <image class="photo-share-icon" :src="DefaultImgPath + 'photo-share.png'"></image>
             </div>
             <div v-if="reset" class="reset" @click="resetCallback">
                 <div class="reset-cont">
@@ -24,25 +27,33 @@
                     </div>
                 </div>
             </div>
+            <div v-if="follow" class="follow" @click="followCallBack">
+                <text class="follow-text">关注指数 ？</text>                
+            </div>
         </div>
     </div>
 </template>
 
 <script type="text/babel">
     const thaw = weex.requireModule('THAW')
+    const storage = weex.requireModule('storage')
     export default {
-        props:['titleName','black','needShare','imgInfo','seriesId','ProductId','reset', 'el'],
+        props: ['titleName','black', 'shareData', 'photoShare', 'imgInfo','seriesId','ProductId','reset', 'el', 'follow'],
         data(){
             return {
                 iosTop:false
             }
         },
         created(){
-            if(weex.config.env.platform == 'iOS'){
+            if(this.isIos()){
                 this.iosTop = true;
             }
         },
         methods:{
+            // 关注指数
+            followCallBack () {
+                this.$emit('followChange')
+            },
             // 重选
             resetCallback () {
                 this.$emit('resetFilter')
@@ -71,10 +82,23 @@
                 })
                 // ga统计
                 this.eventGa(weex.config.deviceId,'点击产品库分享按钮',this.el,'')
-                // weex share
-                this.$emit('shareToggle')
-                // native share
-                // thaw.onShowShare(this.shareData)
+                storage.getItem('appType', res => {
+                    const appType = res.data
+                    if (appType === 'product') {
+                        this.$emit('shareToggle')
+                    } else {
+                        storage.getItem('appVersion', res => {
+                            const version = res.data
+                            const nVersion = Number(version.replace(/\./g, ''))
+                            // app 6.1.6版本以后 分享走weex的
+                            if (nVersion >= 616) {
+                                this.$emit('shareToggle')
+                            } else {
+                                thaw.onShowShare(this.shareData)
+                            }
+                        })
+                    }
+                })
             },
             goback(){
                 //图片页 && 发送给父元素事件
@@ -118,6 +142,19 @@
         border-bottom-left-radius:8px;
         border-bottom-right-radius:8px;
     }
+    .photo-share {
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 100px;
+        height: 90px;
+        justify-content: center;
+        align-items: center;
+    }
+    .photo-share-icon {
+        width: 36px;
+        height: 36px;
+    }
     .share-text{
         color:#586C94;
         font-size:28px;
@@ -140,10 +177,10 @@
         background-color:#111;
     }
     .wrapper{
-        min-width:510px;
+        width:510px;
         height:90px;
         justify-content: center;
-        align-items: center;
+        flex-direction: row;
     }
     .init{
         position:relative;
@@ -162,15 +199,15 @@
         align-items: center;
         flex-direction: row;
     }
-    .title-name{
+    .title-name {
+        flex: 1;
         color:#333;
         font-size:36px;
-        -webkit-box-orient: vertical;
         text-overflow: ellipsis;
-        display: -webkit-box;
-        -webkit-line-clamp: 1;
         overflow: hidden;
         lines: 1;
+        line-height: 90px;
+        text-align: center;
     }
     .back{
         position:absolute;
@@ -188,35 +225,7 @@
     .black-text{
         color:#fff;
     }
-    /*.shade{*/
-        /*position:absolute;*/
-        /*top:0;*/
-        /*width:40px;*/
-        /*height:90px;*/
-
-    /*}*/
-    /*.first-shade{*/
-        /*left:0;*/
-        /*width:0;*/
-        /*!*background-image: linear-gradient(to left,rgba(255,255,255,.8),rgba(255,255,255,.2));*!*/
-        /*border-right-width:10px;*/
-        /*border-right-color:rgba(255,255,255,.8);*/
-        /*border-right-style: solid;*/
-        /*border-left-width:10px;*/
-        /*border-left-color:rgba(255,255,255,.9);*/
-        /*border-left-style: solid;*/
-    /*}*/
-    /*.last-shade{*/
-        /*right:0;*/
-        /*width:0;*/
-        /*border-right-width:10px;*/
-        /*border-right-color:rgba(255,255,255,.9);*/
-        /*border-right-style: solid;*/
-        /*border-left-width:10px;*/
-        /*border-left-color:rgba(255,255,255,.8);*/
-        /*border-left-style: solid;*/
-    /*}*/
-    .reset {
+    .reset,.follow {
         position: absolute;
         right: 0;
         top: 0;
@@ -239,5 +248,16 @@
     .reset-text {
         color: #586c94;
         font-size: 28px;
+    }
+    .follow {
+        right: 24px;
+        width: 134px;
+        height: 90px;
+    }
+    .follow-text {
+        color: #1571e5;
+        font-size: 24px;
+        line-height: 90px;
+        text-align: right;
     }
 </style>

@@ -42,6 +42,9 @@
 			}
 		},
 		created(){
+      //前端监控
+      this.weexLogger('添加车型页')
+
 //			storage.getItem('addSeriesInfo',addSeriesInfo => {
 //				if(addSeriesInfo.result == 'success'){
 //					console.log(JSON.parse(addSeriesInfo.data))

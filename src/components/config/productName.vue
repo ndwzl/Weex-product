@@ -8,38 +8,21 @@
                 <text class="total">/2</text>
             </div>
         </div>
-        <div class="content">
-            <div class="name" v-if="products[0] && products[0].F_ProductName">
+        <div class="content" v-for="(data, index) in products">
+            <div class="name" v-if="data && data.F_ProductName">
                 <!--<text @click="clear(0)" class="clear" :style="{fontFamily:'detail'}">&#xd7;</text>-->
-                <image @click="clear(0)" class="clear"  src="https://s.kcimg.cn/wap/images/detail/productApp/clear.png" style="width:40px;height:40px"></image>
-                <div class="name-wrapper">
-                    <text class="name-text">{{products[0].F_ProductName}}</text>
+                <image @click="clear(index)" class="clear"  src="https://s.kcimg.cn/wap/images/detail/productApp/clear.png" style="width:80px;height:80px"></image>
+                <div class="name-wrapper" @click="$goModel(data)">
+                    <text class="name-text">{{data.F_ProductName}}</text>
                 </div>
-                <div v-if="footerPrice" class="footer-price" @click="goFooterPrice(products[0])">
+                <div v-if="footerPrice" class="footer-price" @click="goFooterPrice(data)">
                     <text class="footer-price-text">询底价</text>
                 </div>
             </div>
-            <div v-else class="add-product" @click="goAddSeries('0')">
-                <image class="add-icon" @click="goAddSeries('0')" src="https://s.kcimg.cn/wap/images/detail/productApp/add-product.png" style="width:70px;height:70px"></image>
+            <div v-else class="add-product" @click="goAddSeries(String(index))">
+                <image class="add-icon" @click="goAddSeries(String(index))" src="https://s.kcimg.cn/wap/images/detail/productApp/add-product.png" style="width:70px;height:70px"></image>
                 <!--<text class="add-icon" :style="{fontFamily:'detail'}" @click="goAddSeries('0')">&#xe604;</text>-->
-                <text class="add-text" @click="goAddSeries('0')">添加车型</text>
-            </div>
-        </div>
-        <div class="content">
-            <div class="name" v-if="products[1] && products[1].F_ProductName">
-                <div class="name-wrapper">
-                    <text class="name-text">{{products[1].F_ProductName}}</text>
-                </div>
-                <!--<text @click="clear(1)" class="clear" :style="{fontFamily:'detail'}">&#xd7;</text>-->
-                <image @click="clear(1)" class="clear"  src="https://s.kcimg.cn/wap/images/detail/productApp/clear.png" style="width:40px;height:40px"></image>
-                <div v-if="footerPrice" class="footer-price" @click="goFooterPrice(products[1])">
-                    <text class="footer-price-text">询底价</text>
-                </div>
-            </div>
-            <div v-else class="add-product" @click="goAddSeries(1)">
-                <!--<text class="add-icon" :style="{fontFamily:'detail'}" @click="goAddSeries(1)">&#xe604;</text>-->
-                <image class="add-icon" @click="goAddSeries('0')" src="https://s.kcimg.cn/wap/images/detail/productApp/add-product.png" style="width:70px;height:70px"></image>
-                <text class="add-text" @click="goAddSeries(1)">添加车型</text>
+                <text class="add-text" @click="goAddSeries(String(index))">添加车型</text>
             </div>
         </div>
     </div>
@@ -63,10 +46,8 @@
             //进入选择车系页面
             goAddSeries(index){
                 storage.setItem('compareNumber',index,res => {
-                    console.log(res)
                     if(res.result == 'success'){
                         this.$emit('goAddSeries')
-//                        this.goWeexUrl('addSeries.weex.js')
                     }
                 })
             },
@@ -81,19 +62,16 @@
             }
         },
         created(){
-            console.log(this.products,'products')
+            // this.alert( this.products.length )
         }
     }
 </script>
 
 <style scoped>
     .product-name{
+        height: 280px;
         flex-direction: row;
-        justify-content: center;
         align-items: center;
-        /*border-top-width:20px;*/
-        /*border-top-style:solid;*/
-        /*border-top-color:#f5f5f5;*/
         background-color:#fff;
     }
     .caption{
@@ -151,11 +129,9 @@
         padding-left:20px;
     }
     .clear{
+        position:absolute;
         top:0;
         right:0;
-        position:absolute;
-        /*top:-40px;*/
-        /*right:-20px;*/
         font-size:36px;
         color: #ccc;
     }

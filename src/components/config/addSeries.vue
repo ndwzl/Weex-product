@@ -1,36 +1,31 @@
 <template>
 	<div class="add-series" ref="addSeries">
 		<div v-if="iosTop" class="ios-top"></div>
+		<div class="product-title">
+			<div class="product-back" @click="addSeriesPop">
+				<!--<text :style="{fontFamily:'detail',fontSize:'32px',color:'#333'}">回</text>-->
+				<image src="https://s.kcimg.cn/wap/images/detail/productApp/back.png" style="width:20px;height:36px"></image>
+			</div>
+			<div class="product-wrapper">
+				<text class="title-name">{{titleName}}</text>
+			</div>
+		</div>
+		<!-- 导航 -->
+		<div class="nav">
+			<!-- 热门 -->
+			<div class="hot" @click="setSelected(0)" >
+				<text :class="['nav-text',selected === 0 ? 'current' : '']">热门</text>
+			</div>
+			<!-- 品牌 -->
+			<div class="brand" @click="setSelected(1)">
+				<text class="" :class="['nav-text',selected === 1 ? 'current' : '']">品牌</text>
+			</div>
+			<!-- 对比记录 -->
+			<div class="contrast-record" @click="setSelected(2)">
+				<text :class="['nav-text',selected === 2 ? 'current' : '']">对比记录</text>
+			</div>
+		</div>
 		<list style="flex: 1;background-color: #f5f5f5;">
-			<header>
-				<div class="product-title">
-					<div class="product-back" @click="addSeriesPop">
-						<!--<text :style="{fontFamily:'detail',fontSize:'32px',color:'#333'}">回</text>-->
-						<image src="https://s.kcimg.cn/wap/images/detail/productApp/back.png" style="width:20px;height:36px"></image>
-					</div>
-					<div class="product-wrapper">
-						<text class="title-name">{{titleName}}</text>
-					</div>
-				</div>
-				<!-- 导航 -->
-				<div class="nav">
-					<!-- 热门 -->
-					<div class="hot" @click="setSelected(0)" >
-						<text :class="['nav-text',selected === 0 ? 'current' : '']">热门</text>
-					</div>
-					<!-- 品牌 -->
-					<div class="brand" @click="setSelected(1)">
-						<text class="" :class="['nav-text',selected === 1 ? 'current' : '']">品牌</text>
-					</div>
-					<!-- 对比记录 -->
-					<div class="contrast-record" @click="setSelected(2)">
-						<text :class="['nav-text',selected === 2 ? 'current' : '']">对比记录</text>
-					</div>
-				</div>
-			</header>
-			<cell>
-
-			</cell>
 
 			<!-- 热门列表 -->
 			<cell class="hot-module" v-if="selected == 0 ">
@@ -271,9 +266,7 @@
 			}
 		},
 		created(){
-			if(weex.config.env.platform == 'iOS'){
-				this.iosTop = true;
-			}
+			this.iosTop = this.isIos()
 //			let cast = weex.requireModule('BroadcastChannel');
 //			this.alert(JSON.stringify(cast))
 
@@ -345,7 +338,7 @@
 					console.log(this.compareHistory)
 				}
 			})
-
+			
 		},
 		methods:{
 			setSelected(index){
@@ -390,6 +383,13 @@
 						})
 					}
 				})
+				// 大数据 选择车系弹层
+				this.collect({
+					p2: 5,
+					p3: 1,
+					p4: item.id
+				})
+				this.p4 = item.id
 			},
 			//隐藏侧边栏
 			sidebarHide(){
@@ -424,13 +424,20 @@
 
 				//选择车系的名字
 				this.seriesName = item.seriesName;
-
+	
 				//请求车型列表
 				this.getData(this.ajaxUrl() + '/index.php?r=weex/product/choose-product&sId=' + item.seriesId + '&subId=' + item.subCateId , ele => {
 					if(ele.ok){
 						this.productList = ele.data.proList;
 						this.$emit('goSelectProduct')
 					}
+				})
+				// 大数据 选择车型页
+				this.collect({
+					p2: 5,
+					p3: 1,
+					p4: this.p4,
+					p5: item.seriesId,
 				})
 			},
 			//隐藏选择车型列表弹窗
@@ -544,6 +551,10 @@
 					duration: 300, //ms
 					timingFunction: 'ease',
 					delay: 0 //ms
+				})
+				this.collect({
+					p2: 5,
+					p3: this.selected,
 				})
 			},
 			addSeriesShow:{

@@ -2,20 +2,17 @@
 
     <div :class="['location',iosTop ? 'noPadding' : '']">
             <div v-if="iosTop" class="ios-top"></div>
+            <!--头部-->
+            <div class="title">
+                <div class="back" @click="selectLocationPop">
+                    <!--<text :style="{fontFamily:'detail',fontSize:'32px',color:'#333'}">回</text>-->
+                    <image src="https://s.kcimg.cn/wap/images/detail/productApp/back.png" style="width:20px;height:36px"></image>
+                </div>
+                <div class="wrapper">
+                    <text class="title-name">选择地区</text>
+                </div>
+            </div>
             <list class="location-wrapper"><!-- @scroll="scrollContent" ref="locationWrapper"-->
-                <!--头部-->
-                <header>
-                    <div class="title">
-                        <div class="back" @click="selectLocationPop">
-                            <!--<text :style="{fontFamily:'detail',fontSize:'32px',color:'#333'}">回</text>-->
-                            <image src="https://s.kcimg.cn/wap/images/detail/productApp/back.png" style="width:20px;height:36px"></image>
-                        </div>
-                        <div class="wrapper">
-                            <text class="title-name">选择地区</text>
-                        </div>
-                    </div>
-                </header>
-
                 <!--地区搜索-->
                 <cell :class="['search-location',searching?'searching':'']">
                     <div class="search-box">
@@ -37,7 +34,7 @@
                     </div>
                     <div class="hot-content">
                         <div v-for="(ele,index) in hotLocation" class="hot-location-list" @click="shortcutSelectLocation(ele)">
-                            <image v-if="myRegion && index == 0"  src="https://s.kcimg.cn/wap/images/detail/productApp/location-f60.png" style="width:20px;height:24px;margin-right:10px"></image>
+                            <image v-if="myRegion && index == 0"  src="https://s.kcimg.cn/wap/images/detail/productApp/location-f60.png" style="width:20px;height:24px;position:absolute;left:4px;top:16px;"></image>
                             <!--<text v-if="myRegion && index == 0" :style="{fontFamily:'detail',color:'#f60',fontSize:'28px',marginRight:'5px'}">&#xe60a;</text>-->
                             <text class="hot-location-text">{{ele.cityName}}</text>
                         </div>
@@ -169,7 +166,7 @@
                console.log(this.$refs)
                 this.indexNav = this.locationData.indexNav[index];
                 let nav = [this.locationData.indexNav[index]][0];
-                dom.scrollToElement(this.$refs[nav][0], {offset: -90})
+                dom.scrollToElement(this.$refs[nav][0], {offset: 0})
             },
             //输入框搜索
             searchLocation(event){
@@ -539,14 +536,14 @@
         border-top-right-radius: 8px;
         border-bottom-left-radius: 8px;
         border-bottom-right-radius: 8px;
+		position: relative;
     }
     .hot-location-text{
+		width: 180px;
         color:#333;
         font-size:28px;
-        -webkit-box-orient: vertical;
+		text-align: center;
         text-overflow: ellipsis;
-        display: -webkit-box;
-        -webkit-line-clamp: 1;
         overflow: hidden;
         lines: 1;
     }
@@ -578,11 +575,10 @@
     }
     .location-nav{
         position:fixed;
-        top:0;
+        top:546px;
         right:0;
         bottom:0;
         align-items: center;
-        justify-content: center;
     }
     .index-nav{
         padding-left:20px;

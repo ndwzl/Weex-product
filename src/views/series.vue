@@ -2,16 +2,18 @@
     <div class="series">
         <div v-if="iosTop" class="ios-top"></div>
 
+        <title :shareData="shareData" @shareToggle="shareShow" :titleName="titleName" :seriesId="seriesInfo.F_SeriesId" :el="el"></title>
+
         <list style="flex: 1">
-            <header ref="goTop">
+            <!-- <header ref="goTop"> -->
                 <!--标题-->
-                <title needShare="1" @shareToggle="shareShow" :titleName="titleName" :seriesId="seriesInfo.F_SeriesId" :el="el"></title>
-            </header>
-            <cell>
-                <!--nav导航-->
-                <nav :navList="navList" :navInfo="navInfo"></nav>
+                <!-- <title :shareData="shareData" @shareToggle="shareShow" :titleName="titleName" :seriesId="seriesInfo.F_SeriesId" :el="el"></title> -->
+            <!-- </header> -->
+            <cell ref="goTop">
                 <!--卡车图片信息-->
                 <truck-image :truckImageData="truckImageData" url="seriesPhoto.weex.js"></truck-image>
+                <!--nav导航-->
+                <nav :navList="navList" :navInfo="navInfo"></nav>
                 <!--车型列表-->
                 <model-type-list v-if="seriesInfo.F_SubCategoryId" :update="modelTypeListUpdate" :seriesInfo="seriesInfo" :locationInfo="locationInfo" :el="el"></model-type-list>
                 <!--经销商-->
@@ -23,7 +25,7 @@
                 <!--论坛-->
                 <!--<bbs-list :bbsList="bbsList" :titleName="titleName" :morePostUrl="morePostUrl"></bbs-list>-->
                 <!--其他人还关注-->
-                <other-concerns :otherData="otherData" :el="el" @goSeries="goSeries" :seriesId="seriesInfo.F_SeriesId"></other-concerns>
+                <other-concerns v-if="seriesInfo.F_SeriesId && otherData" :otherData="otherData" :el="el" @goSeries="goSeries" :seriesId="seriesInfo.F_SeriesId"></other-concerns>
                 <!--二手车推荐-->
                 <!--<second-hand v-if="secondHandData.data" :secondHandData="secondHandData"></second-hand>-->
             </cell>
@@ -38,7 +40,7 @@
         <!--切换地区弹层-->
         <switch-location-pop v-if="switchLocationShow" :cityName="myRegion.cityName" @cancelSwitch="cancelSwitch" @okSwitch="okSwitch"></switch-location-pop>
         <!-- weex分享 -->
-        <weexShare :shareParams="shareData" :showShare="showShare" @shareCallBack="shareCallBack"></weexShare>
+        <weexShare :shareParams="shareData" :showShare="showShare" @shareCallBack="shareCallBack" @tapShare="tapShare"></weexShare>
     </div>
 </template>
 
@@ -58,12 +60,12 @@
     import footerInfo from '../components/footerInfo.vue'
     import switchLocationPop from '../components/switchLocationPop.vue'
 
-    let domModule = weex.requireModule('dom')
-    let stream = weex.requireModule('stream')
-    let modal = weex.requireModule('modal')
-    let storage = weex.requireModule('storage')
-    let thaw = weex.requireModule('THAW')
-    let globalEvent = weex.requireModule('globalEvent');
+    const domModule = weex.requireModule('dom')
+    const stream = weex.requireModule('stream')
+    const modal = weex.requireModule('modal')
+    const storage = weex.requireModule('storage')
+    const thaw = weex.requireModule('THAW')
+    const globalEvent = weex.requireModule('globalEvent')
     export default {
         data(){
             return {
@@ -83,24 +85,25 @@
                 },
                 navList:[
                     {
-                        name:'综述',
-                        url:'series.weex.js',
-                        selected:true
-                    },
-                    {
-                        name:'配置',
-                        url:'config.weex.js',
-                        selected:false
+                        name: '配置',
+                        url: 'config.weex.js',
+						icon: 'nav-config.png',
+						width: '56px',
+						height: '42px'
                     },
                     {
                         name:'图片',
                         url:'seriesPhoto.weex.js',
-                        selected:false
+						icon: 'nav-photo.png',
+						width: '54px',
+						height: '46px'
                     },
                     {
                         name:'经销商',
                         url:'dealer.weex.js',
-                        selected:false
+						icon: 'nav-dealer.png',
+						width: '56px',
+						height: '46px'
                     }
                 ],
                 //卡车图片信息
@@ -126,7 +129,9 @@
                     cityId:'',
                 },
                 //经销商数据
-                dealerData:{},
+                dealerData:{
+                    notDealer: true
+                },
                 //选择城市弹层显示与隐藏
                 LocationPop:false,
                 //选择地区列表数据
@@ -185,8 +190,32 @@
             }
         },
         methods:{
+			// 点击分享
+			tapShare (platform) {
+				this.sendBigData(0, String(platform))
+			},
+			// 发送大数据统计 
+            sendBigData (isSuccess, platform) {
+				// ['微信好友', '微信朋友圈', 'QQ好友', 'QQ空间', '新浪微博', '复制链接']
+				// p3= 分享对象   1: 微信好友 2: 微信群  3: 朋友圈 4：Q空间   5: QQ好友 6：新浪微博   7:卡友圈   8：复制链接
+				const map = new Map([
+					['0', 1],
+					['1', 3],
+					['2', 5],
+					['3', 4],
+					['4', 6],
+					['5', 8],
+				])
+				let param = {
+					p1: 2,
+                    p2: this.seriesInfo.F_SeriesId,
+					p3: map.get(platform),
+					p4: isSuccess,
+                }
+                this.collect(param)
+            },
             shareShow () {
-                this.showShare = true
+				this.showShare = true
             },
             // 分享的回调
             shareCallBack (data) {
@@ -194,7 +223,8 @@
                 if (data.status === '0') {
                     const platformList = ['微信好友', '微信朋友圈', 'QQ好友', 'QQ空间', '新浪微博', '复制链接']
                     const platform = platformList[data.platform]
-                    this.eventGa(weex.config.deviceId, '分享产品库成功', this.el, platform)
+					this.eventGa(weex.config.deviceId, '分享产品库成功', this.el, platform)
+					this.sendBigData(1, data.platform)
                 }
             },
             getSeriesData(){
@@ -246,13 +276,12 @@
                                 //发送GA
                                 this.goUrlGa(weex.config.deviceId,'product.m.360che.com','产品库-子类车系综述页',ele.data.title)
 
-                                //隐藏加载loading
                                 this.hideLoading()
                             }
                         });
 
                         //请求车系页面其他数据
-                        this.getData(this.ajaxUrl() + '/index.php?r=weex/series/other&subCateId=' + this.seriesInfo.F_SubCategoryId + '&seriesId=' + this.seriesInfo.F_SeriesId + '&proId=' + this.seriesInfo.proid + '&provinceId=' + this.locationInfo.provinceId + '&cityId=' + this.locationInfo.cityId + '&nocache=360checache', (ele) => {
+                        this.getData(this.ajaxUrl() + '/index.php?r=weex/series/other&subCateId=' + this.seriesInfo.F_SubCategoryId + '&seriesId=' + this.seriesInfo.F_SeriesId + '&proId=' + this.seriesInfo.proid + '&provinceId=' + this.locationInfo.provinceId + '&cityId=' + this.locationInfo.cityId, (ele) => {
                             if (ele.ok) {
                                 //文章数据
 //                                this.articlesList = ele.data.articles;
@@ -276,8 +305,6 @@
 
                                 //存储询底价信息
                                 storage.setItem('seriesFooterInfo', JSON.stringify(this.footerInfo))
-                                //隐藏加载loading
-                                this.hideLoading()
                             }
                         });
 
@@ -327,14 +354,18 @@
 
             //请求经销商数据
             getDealerData(){
-                this.getData(this.ajaxUrl() + '/index.php?r=weex/series/dealer&subCateId=' + this.seriesInfo.F_SubCategoryId + '&seriesId=' + this.seriesInfo.F_SeriesId + '&provinceId=' + this.locationInfo.provinceId + '&cityId=' + this.locationInfo.cityId ,(ele) => {
+                this.getData(this.ajaxUrl() + '/index.php?r=weex/series/dealer&subCateId=' + this.seriesInfo.F_SubCategoryId + '&seriesId=' + this.seriesInfo.F_SeriesId + '&provinceId=' + this.locationInfo.provinceId + '&cityId=' + this.locationInfo.cityId + '&' + new Date().getTime(),(ele) => {
                     if(ele.ok){
+                        // debug: 服务端未过滤制表符 weex内不识别 替换制表符·（&#183;）
+                        ele.data.list.length && ele.data.list.forEach(item => {
+                            if (item.article) item.article = item.article.replace(/&#183;/g, '·')
+                        })
                         this.dealerData = ele.data;
-
-                        if(!this.dealerData.list.length){
-                            this.dealerData.notDealer = true;
-                        }else{
+                        const list = this.dealerData.list
+                        if (Array.isArray(list) && list.length) {
                             this.dealerData.notDealer = false;
+                        } else {
+                            this.dealerData.notDealer = true;
                         }
                     }
                 })
@@ -442,12 +473,14 @@
 
                         //返回页面顶部
                         let goTop = this.$refs['goTop'];
-                        domModule.scrollToElement(goTop, {offset: 0})
+                        domModule.scrollToElement(goTop, {offset: 0, animated: false})
                     }
                 })
             }
         },
         created(){
+            //前端监控
+            this.weexLogger('子类车系综述页')
 
             //监听用户点击安卓物理返回键
             globalEvent && globalEvent.addEventListener("onRespondNativeBack",(e) => {
@@ -495,11 +528,6 @@
                     }
                 });
             }
-
-
-
-            //隐藏加载loading
-            this.hideLoading()
 
         },
         components:{

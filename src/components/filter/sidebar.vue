@@ -1,5 +1,5 @@
 <template>
-    <div :class="['sidebar-wraper', isIos ? 'iosTop' : '']">
+    <div :class="['sidebar-wraper', iosTop ? 'iosTop' : '']"  v-if="list">
         <div class="sidebar-mask" @click="closeSiderbar"></div>
         <div class="sidebar" ref="sidebar">
             <list>
@@ -27,9 +27,14 @@
     const storage = weex.requireModule('storage')
     const animation = weex.requireModule('animation')
     export default {
-        props: ['list', 'isIos', 'page', 'index', 'type'],
+        props: ['list', 'page', 'index', 'type'],
         data () {
-            return {}
+            return {
+                iosTop: false
+            }
+        },
+        created () {
+            this.iosTop = this.isIos()
         },
         methods: {
             switchMethod (data) {
@@ -40,7 +45,19 @@
                     case 'filterResult':
                         this.filterResultSelected(data)
                         break;
+                    case 'config':
+                        this.config(data)
+                        
+                        break;
+                    default:
+                        this.$emit('returnData', data)
+                        break;
                 }
+            },
+            // 配置页
+            config (data) {
+                if (data.is_disable) return false
+                this.$emit('selectModelType', data, this.index)
             },
             filterJump (data) {
                 // 跳转前关闭弹层

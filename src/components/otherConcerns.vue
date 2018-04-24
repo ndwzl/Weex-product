@@ -10,17 +10,15 @@
                 <text class="exchange-text">换一批</text>
             </div>
         </div>
-        <div class="other-content">
-            <div v-for="ele in otherData" class="other-list" @click="goSeries(ele)">
-                <image :src="ele.img" style="width:180px;height:120px;margin-right:20px"></image>
-                <div class="truck-info">
-                    <text class="truck-name">{{ele.name ? ele.name : ele.F_ProductName}}</text>
-                    <text class="truck-price">{{ele.price ? ele.price : ele.F_Price == 0 ? '暂无报价' : ele.F_Price + '万'}}</text>
-                    <div class="footer-price" v-if="ele.askProId || ele.F_ProductId"  @click="goFooterPrice(ele)">
-                        <text class="truck-price-text">询底价</text>
-                        <!--<text :style="{fontFamily:'detail',fontSize:'24px',color:'#f60'}">&#x53bb;</text>-->
-                        <image src="https://s.kcimg.cn/wap/images/detail/productApp/go-f60.png" style="width:14px;height:24px;margin-left:10px"></image>
-                    </div>
+        <div v-for="ele in otherData" class="other-list" @click="goSeries(ele)">
+            <image :src="ele.img" style="width:180px;height:120px;margin-right:20px"></image>
+            <div class="truck-info">
+                <text class="truck-name">{{ele.name ? ele.name : ele.F_ProductName}}</text>
+                <text :class="['truck-price', fromModelPage ? 'truck-price-from-model' : '']">{{ele.price ? ele.price : ele.F_Price == 0 ? '暂无报价' : ele.F_Price + '万'}}</text>
+                <div class="footer-price" v-if="ele.askProId || ele.F_ProductId"  @click="goFooterPrice(ele)">
+                    <text class="truck-price-text">询底价</text>
+                    <!--<text :style="{fontFamily:'detail',fontSize:'24px',color:'#f60'}">&#x53bb;</text>-->
+                    <image src="https://s.kcimg.cn/wap/images/detail/productApp/go-f60.png" style="width:14px;height:24px;margin-left:10px"></image>
                 </div>
             </div>
         </div>
@@ -32,7 +30,7 @@
     let storage = weex.requireModule('storage')
 
     export default {
-        props:['otherData','exchangeButton','el','seriesId','ProductId'],
+        props:['otherData','exchangeButton','el','seriesId','ProductId', 'fromModelPage'],
         components:{subTitle},
         methods:{
             //点击换一批
@@ -90,13 +88,11 @@
 </script>
 
 <style scoped>
-    .other-content{
-        padding-left:30px;
-    }
     .other-list{
         padding-top:30px;
         padding-right:30px;
         padding-bottom:30px;
+        padding-left:30px;
         flex-direction:row;
         border-bottom-width:1px;
         border-bottom-style:solid;
@@ -147,6 +143,7 @@
         position:relative;
     }
     .truck-name{
+        line-height: 40px;
         color:#333;
         font-size:32px;
         -webkit-box-orient: vertical;
@@ -161,10 +158,15 @@
         color:#f60;
         font-size:28px;
     }
+    .truck-price-from-model {
+        color:#f60;
+        font-size:28px;
+        line-height: 28px;
+    }
     .footer-price{
         position:absolute;
         right:0;
-        bottom:-10px;
+        bottom:-14px;
         height:60px;
         width:146px;
         flex-direction: row;

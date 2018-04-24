@@ -4,9 +4,9 @@
         <list style="flex: 1" @scroll="sticky">
             <header>
                 <!--标题-->
-                <title :titleName="titleName"></title>
+                <title @shareToggle="shareShow" :titleName="titleName" :shareData="shareData" :el="el"></title>
                 <!--对比车型名称-->
-                <product-name :products="configData.products" :compareNumber="compareNumber"  @clear="clear" @goAddSeries="addSeriesPop"></product-name>
+                <product-name :footerPrice="1" :products="configData.products" :compareNumber="compareNumber"  @clear="clear" @goAddSeries="addSeriesPop"></product-name>
             </header>
             <!--对比车型选项-->
             <cell class="model" ref="车型信息">
@@ -33,12 +33,12 @@
                     <div class="content footer-price">
                         <text class="content-text" v-if="configData.lowPrice[0] && configData.lowPrice[0].F_BigPrice && configData.lowPrice[0].F_BigPrice != 0 && configData.lowPrice[0].F_BigPrice != 'kong'">{{configData.lowPrice[0] && configData.lowPrice[0].F_BigPrice}}万</text>
                         <text class="content-text" v-if="configData.lowPrice[0] && !configData.lowPrice[0].F_BigPrice && configData.lowPrice[0].F_BigPrice != 'kong'">暂无报价</text>
-                        <text class="footer-price-text"  v-if="configData.lowPrice[0] && configData.lowPrice[0].F_BigPrice != 'kong'" @click="goFooterPirce(configData.products[0])">询价</text>
+                        <!-- <text class="footer-price-text"  v-if="configData.lowPrice[0] && configData.lowPrice[0].F_BigPrice != 'kong'" @click="goFooterPirce(configData.products[0])">询价</text> -->
                     </div>
                     <div class="content footer-price">
                         <text class="content-text" v-if="configData.lowPrice[1] && configData.lowPrice[1].F_BigPrice && configData.lowPrice[1].F_BigPrice != 0 && configData.lowPrice[1].F_BigPrice != 'kong'">{{configData.lowPrice[1] && configData.lowPrice[1].F_BigPrice}}万</text>
                         <text class="content-text"  v-if="configData.lowPrice[1] && !configData.lowPrice[1].F_BigPrice && configData.lowPrice[1].F_BigPrice != 'kong'">暂无报价</text>
-                        <text class="footer-price-text" v-if="configData.lowPrice[1] && configData.lowPrice[1].F_BigPrice != 'kong'" @click="goFooterPirce(configData.products[1])">询价</text>
+                        <!-- <text class="footer-price-text" v-if="configData.lowPrice[1] && configData.lowPrice[1].F_BigPrice != 'kong'" @click="goFooterPirce(configData.products[1])">询价</text> -->
                     </div>
                 </div>
             </cell>
@@ -53,12 +53,17 @@
                         <text class="caption-text">{{item.F_ParameterName}}</text>
                     </div>
                     <div class="content">
-                        <text class="content-text">{{item.value + item.unit}}</text>
+                        <text class="content-text" v-if="item.F_ParameterName !== '公告型号'">{{item.value + item.unit}}</text>
+                        <text class="content-text blues" v-if="item.F_ParameterName === '公告型号'" @click="toWeb(item.value)">{{item.value}}</text>
                     </div>
                     <div class="content">
-                        <text class="content-text">{{configData.paramList[1] && configData.paramList[1][i] && configData.paramList[1][i].list && configData.paramList[1][i].list[index] && configData.paramList[1][i].list[index].value + configData.paramList[1][i].list[index].unit}}</text>
+                        <text class="content-text" v-if="configData['paramList'][1] && configData['paramList'][1][i] && configData['paramList'][1][i]['list'] && configData['paramList'][1][i]['list'][index] && configData['paramList'][1][i]['list'][index]['F_ParameterName'] !== '公告型号'">{{configData.paramList[1][i].list[index].value + configData.paramList[1][i].list[index].unit}}</text>
+                        <text class="content-text blues" v-if="configData['paramList'][1] && configData['paramList'][1][i] && configData['paramList'][1][i]['list'] && configData['paramList'][1][i]['list'][index] && configData['paramList'][1][i]['list'][index]['F_ParameterName'] === '公告型号'" @click="toWeb(configData.paramList[1][i].list[index].value)">{{configData.paramList[1][i].list[index].value}}</text>
                     </div>
                 </div>
+            </cell>
+            <cell>
+                <text style="font-size: 24px;padding: 10px;color: #999;background-color: #fafafa;">注：不符合中华人民共和国法规的，例如国三/国四车型，国内已经不能上牌，仅供出口，或国内非公路内部转运等不上牌地区使用。此参数仅供参考，实际车型配置以店内实车为准。</text>
             </cell>
         </list>
         <!--分类框-->
@@ -80,25 +85,24 @@
 
         <!--添加车系弹层-->
         <add-series :addSeriesShow="addSeriesShow" :selectProductPop="selectProductPop" @hideAddProduct="goSelectProduct" @goSelectProduct="goSelectProduct" @addSeriesPop="addSeriesPop" @selectModel="selectModel" :selectedProductId="selectedProductId" :compareData="compareData"></add-series>
-    </div>
+		<!-- weex分享 -->
+        <weexShare :shareParams="shareData" :showShare="showShare" @shareCallBack="shareCallBack"></weexShare>
+	</div>
 </template>
 
 <script type="text/babel">
-    let storage = weex.requireModule('storage')
+  let storage = weex.requireModule('storage')
 
     import title from '../components/title.vue'
-    import nav from '../components/nav.vue'
     import productName from '../components/config/productName.vue'
     import footerInfo from '../components/footerInfo.vue'
     import addSeries from '../components/config/addSeries.vue'
 
     let dom = weex.requireModule('dom')
-    let globalEvent = weex.requireModule('globalEvent');
-
+    let globalEvent = weex.requireModule('globalEvent')
     export default {
         components:{
             title,
-            nav,
             productName,
             footerInfo,
             addSeries
@@ -158,18 +162,25 @@
                 //苹果头部白条
                 iosTop:false,
                 //统计
-                el:'产品库-车型配置页'
+				el:'产品库-车型配置页',
+				showShare: false,
+				// 分享数据
+				shareData: {}
             }
         },
         created(){
+            //前端监控
+            this.weexLogger('子类车型配置页')
+
+            
+            this.showLoading()
+
             //监听用户点击安卓物理返回键
             globalEvent && globalEvent.addEventListener("onRespondNativeBack",(e) => {
                 this.goBack();
             });
 
-            if(weex.config.env.platform == 'iOS'){
-                this.iosTop = true;
-            }
+            this.iosTop = this.isIos()
 
             //获取询底价信息
             storage.getItem('modelFooterInfo',ele => {
@@ -212,6 +223,14 @@
 
                     this.getData(this.ajaxUrl() + '/index.php?r=weex/product/config&productId=' + ProductId.data,ele => {
                         if(ele.ok){
+							let shareData = ele.data.share
+							//分享数据
+							this.shareData = {
+								title: shareData.h1,
+								desc: shareData.title,
+								link: shareData.url,
+								imgUrl: shareData.img,
+							}
                             //标题
                             this.titleName = ele.data.productInfo.F_ProductName  + '配置';
 
@@ -255,14 +274,36 @@
                                 this.compareData = data[seriesId];
 
                                 storage.setItem('compareData',JSON.stringify(data))
-                            })
 
+                                if (this.configData.products.length === 1) {
+                                    this.configData.products.push({
+                                        F_BigPrice: 'kong',
+                                        F_Price: 'kong',
+                                    })
+                                }
+                                this.hideLoading()
+                            })
                         }
                     })
                 }
             })
         },
         methods:{
+			shareCallBack (data) {
+                // 分享成功
+                if (data.status === '0') {
+                    const platformList = ['微信好友', '微信朋友圈', 'QQ好友', 'QQ空间', '新浪微博', '复制链接']
+                    const platform = platformList[data.platform]
+                    this.eventGa(weex.config.deviceId, '分享产品库成功', this.el, platform)
+                }
+            },
+            toWeb (num) {
+                this.goUrl(`https://product.m.360che.com/gonggao/#/bulletin?v=${num}`)
+            },
+			// 分享弹层显示
+            shareShow () {
+                this.showShare = true
+            },
             //清除数据
             clear(index){
                 this.configData.products[index].F_ProductName = '';
@@ -325,7 +366,7 @@
                 }else{
                     ele = this.$refs[index][0]
                 }
-                dom.scrollToElement(ele, {offset: -288})
+                dom.scrollToElement(ele, {offset: -350})
                 this.classifyPop = false;
             },
             //询底价
@@ -360,6 +401,8 @@
             },
             //选择车型
             selectModel(ele){
+
+                this.showLoading()
 
                 //查看对比缓存
                 storage.getItem('compareData',compareData => {
@@ -399,7 +442,6 @@
 
                                                 //对比的数量
                                                 this.compareNumber = productInfo.data.data.length;
-
                                                 //增加对比pv
                                                 if(productInfo.data.data.length == 2){
                                                     //发送PV
@@ -448,6 +490,8 @@
                                                         this.addSeriesShow = false;
                                                     })
                                                 })
+
+                                                this.hideLoading()
                                             }
                                         })
                                     }
@@ -618,4 +662,5 @@
         border-bottom-left-radius:4px;
         border-bottom-right-radius:4px;
     }
+    .blues{color:#586c94;}
 </style>

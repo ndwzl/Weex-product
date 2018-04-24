@@ -2,7 +2,7 @@
     <div class="container">
         <list class="list">
             <header>
-                <nav-bar @historyShow="historyShow"></nav-bar>
+                <nav-bar @historyShow="historyShow" :currentVersion="currentVersion"></nav-bar>
             </header>
             <cell ref="#">
                 <recommend-list :recommendList="recommendList" @SidebarShow="SidebarShow" v-if="!errorButton"></recommend-list>
@@ -10,9 +10,9 @@
             <cell v-for="(brandListInfo,index) in brandList" :ref="indexNav[index+1]">
                 <brand-list :brandListInfo="brandListInfo" :index="indexNav[index+1]" @SidebarShow="SidebarShow"></brand-list>
             </cell>
-            <cell>
+            <!-- <cell>
                 <other-brandList v-if="moreBrandShow" :otherBrandList="otherBrandList" @SidebarShow="SidebarShow"></other-brandList>
-            </cell>
+            </cell> -->
         </list>
 
         <!--nav导航-->
@@ -57,7 +57,8 @@
                     <text class="empty-history-text">暂无浏览记录，赶紧去看吧~</text>
                 </cell>
                 <!--弹层内容-->
-                <cell v-if="showSidebar && seriesMoreShow" v-for="(data,index) in sidebarList.otherSeriesList">
+                <!-- <cell v-if="showSidebar && seriesMoreShow" v-for="(data,index) in sidebarList.otherSeriesList"> -->
+                <cell v-if="showSidebar" v-for="(data,index) in sidebarList.otherSeriesList">
                     <div class="title">
                         <text class="title-text">{{data[0].info.F_SubCategoryName}}</text>
                     </div>
@@ -75,13 +76,13 @@
                         </div>
                     </div>
                 </cell>
-                <cell v-if="showSidebar && moreSeriesButtonShow" class="seriesMore">
+                <!-- <cell v-if="showSidebar && moreSeriesButtonShow" class="seriesMore">
                     <div class="seriesMore-button" @click="seriesMore">
                         <text class="seriesMore-button-text">{{seriesMoreShow?'收起':'展开'}}更多车系</text>
                         <image ref="more" src="https://s.kcimg.cn/wap/images/app_icon/down.png" style="width:44px;height:30px;"></image>
-                        <!--<text  ref="more" :style="{fontFamily:'detail',color:'#999',fontSize:'32px'}">&#x4e0b;</text>-->
+                        <text  ref="more" :style="{fontFamily:'detail',color:'#999',fontSize:'32px'}">&#x4e0b;</text>
                     </div>
-                </cell>
+                </cell> -->
             </list>
 
             <!--清除历史记录-->
@@ -114,7 +115,7 @@
     import recommendList from '../components/brandList/recommendBrand.vue'
     import brandList from '../components/brandList/brandList.vue'
     import indexNav from '../components/brandList/indexNav.vue'
-    import otherBrandList from '../components/brandList/otherBrandList.vue'
+    // import otherBrandList from '../components/brandList/otherBrandList.vue'
     import errorPop from '../components/errorPop.vue'
     import mixins from '../mixins'
     import cacheVersion from '../config/version.js'
@@ -138,9 +139,9 @@
                 //品牌导航
                 indexNav:[],
                 //更多品牌列表
-                otherBrandList:[],
+                // otherBrandList:[],
                 //展开更多品牌按钮隐藏
-                moreBrandShow:false,
+                moreBrandShow: true,
                 //sidebar内容
                 sidebarList: {},
                 //sidebar内容标题
@@ -163,6 +164,8 @@
                 errorPopText:'当前网络不可用，请检查网络设置',
                 //网络出错重新加载按钮
                 errorButton:false,
+                // 当前版本
+                currentVersion: ''
             }
         },
         methods: {
@@ -222,7 +225,7 @@
                                 if(success.result == 'success'){
                                     //成功之后跳转url
 //                                    thaw.goUrl('https://product.m.360che.com' + ele.series_url.detailUrl);
-                                    this.showLoading();
+                                    // this.showLoading();
                                     //存储车系数据
                                     storage.setItem('seriesInfo',JSON.stringify(ele.info),() => {
                                         //跳转
@@ -234,7 +237,7 @@
                         }else{
                             //已有的历史记录直接跳转
 //                            thaw.goUrl('https://product.m.360che.com' + ele.series_url.detailUrl)
-                            this.showLoading()
+                            // this.showLoading()
                             //存储车系数据
                             storage.setItem('seriesInfo',JSON.stringify(ele.info),() => {
                                 //跳转
@@ -251,7 +254,7 @@
                             if(success.result == 'success'){
                                 //成功之后跳转url
 //                                thaw.goUrl('https://product.m.360che.com' + ele.series_url.detailUrl)
-                                this.showLoading();
+                                // this.showLoading();
                                 //存储车系数据
                                 storage.setItem('seriesInfo',JSON.stringify(ele.info),() => {
                                     //跳转
@@ -265,8 +268,6 @@
             },
             //显示历史记录
             historyShow(){
-              // this.alert(1)
-              console.log('展开历史记录')
                 //隐藏展开更多车系按钮
                 this.moreSeriesButtonShow = false;
                 //隐藏sidebar内容标题
@@ -307,6 +308,7 @@
                         })
                     })
                 })
+                this.collect({p2: 4})
             },
             //点击清除历史记录
             clearHistory(){
@@ -320,7 +322,6 @@
             },
             //显示sidebar
             SidebarShow(ele,other){
-                console.log(ele)
 //                let ajaxUrl = ele.url.replace('product.m.360che.com', 'product-yufabu.m.360che.com');
 //                ajaxUrl = ajaxUrl.replace('https', 'http');
                 let ajaxUrl = ele.url + '&isJson=1&noIndex=1';
@@ -359,7 +360,7 @@
 
                         //如果点击更多品牌，隐藏车系 && 直接显示sidebar的更多车系
                         if(other == 'other'){
-                            this.seriesMoreShow = true;
+                            // this.seriesMoreShow = true;
                             this.moreSeriesButtonShow = false;
                         }
 
@@ -422,7 +423,7 @@
                     //隐藏sidebar
                     this.showSidebar = false;
                     //隐藏更多车系
-                    this.seriesMoreShow = false;
+                    // this.seriesMoreShow = false;
                 })
 
             },
@@ -447,9 +448,7 @@
             },
             //点击重新加载数据
             getBrandsData(){
-                this.getData(this.ajaxUrl() +'/index.php?r=api/gethotbrandlist&haveGroup=1&noIndex=1', data => {
-//                this.alert(this.ajaxUrl() + '/index.php?r=api/gethotbrandlist&haveGroup=1&noIndex=1')
-//                this.alert(JSON.stringify(data))
+                this.getData(this.ajaxUrl() +'/index.php?r=api/brand/gethotbrandlist&haveGroup=1&noIndex=1&isW=2', data => {
                     if (data.ok) {
                         //推荐品牌列表
                         this.recommendList = data.data.recommend;
@@ -459,7 +458,7 @@
                         data.data.letter.unshift('#')
                         this.indexNav = data.data.letter;
                         //更多品牌列表
-                        this.otherBrandList = data.data.otherBrandList;
+                        // this.otherBrandList = data.data.otherBrandList;
 
                         //显示展开更多品牌按钮
                         this.$nextTick(function(){
@@ -469,7 +468,6 @@
                         this.errorPopShow = false;
                         this.errorButton = false;
 
-//                        storage.setItem('brandsData', JSON.stringify(data));
                     } else {
                         if(!this.moreBrandShow){
                             this.errorPopShow = true;
@@ -480,6 +478,9 @@
             }
         },
         created(){
+            //前端监控
+            this.weexLogger('品牌页')
+
             //存储deviceId
             if(weex.config.deviceId){
                 storage.setItem('deviceId',weex.config.deviceId)
@@ -489,13 +490,23 @@
             if(weex.config.userId){
                 storage.setItem('userId',weex.config.userId)
             }
-            // this.alert(JSON.stringify(weex.config.userId))
 
-            //发送GA统计
+            if (weex.config.appversion) {
+                storage.setItem('appVersion', weex.config.appversion)
+            } else {
+                storage.setItem('appVersion', '')
+            }
+            if (weex.config.appType) {
+                storage.setItem('appType', weex.config.appType)
+            } else {
+                storage.setItem('appType', '')
+            }
+
+            //发送大数据统计
             this.collect({
             })
 
-            // 发送谷歌统计
+            // 发送GA统计
             this.goUrlGa(weex.config.deviceId, 'product.m.360che.com', '产品库-品牌大全页', '品牌大全')
 
             //iconFont字体
@@ -505,13 +516,12 @@
             });
             //请求接口,查看版本号
             this.getData(`${this.ajaxUrl()}/index.php?r=weex/index/version&ts=${+new Date()}`, ele => {
-                let currentVersion;
                 if (ele.ok && ele.data.info == 'ok' && ele.data.version) {
-                    currentVersion = ele.data.version
+                    this.currentVersion = ele.data.version
                 } else {
-                    currentVersion = cacheVersion
+                    this.currentVersion = cacheVersion
                 }
-                storage.setItem('versions', currentVersion)
+                storage.setItem('versions', this.currentVersion)
             })
 
 //            storage.getItem('brandsData', ele => {
@@ -536,7 +546,7 @@
                     //nav导航
                     this.indexNav = data.data.letter;
                     //更多品牌列表
-                    this.otherBrandList = data.data.otherBrandList;
+                    // this.otherBrandList = data.data.otherBrandList;
 
                     //显示展开更多品牌按钮
                     this.$nextTick(function(){
@@ -553,7 +563,7 @@
             recommendList,
             brandList,
             indexNav,
-            otherBrandList,
+            // otherBrandList,
             errorPop
         },
         watch:{
@@ -567,10 +577,7 @@
             }
         },
         mounted(){
-//            navigator.push({
-//                url: 'https://192.168.1.120:8888/dist/series.weex.js',
-//                animated: "true"
-//            })
+
             globalEvent && globalEvent.addEventListener("onSendLocation",(e) => {
                 if(e.state == 'success') {
                     storage.setItem('getlocationInfo', JSON.stringify(e))
@@ -687,6 +694,7 @@
     .truck-detail{
         flex:1;
         padding-left:20px;
+        height: 100px;
     }
     .not-image{
         width:150px;
@@ -697,12 +705,17 @@
     }
     .truck-name{
         color:#333;
-        font-size:32px;
+        font-size:30px;
+        height: 76px;
+        text-align: left;
+        line-height: 36px;
+        word-break: break-all;
     }
     .truck-price{
         color:#f60;
         font-size:24px;
-        padding-top: 20px;
+        line-height: 24px;
+        padding-top: 0;
     }
     .seriesMore{
         padding-top:40px;

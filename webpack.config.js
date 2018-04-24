@@ -65,6 +65,20 @@ function getBaseConfig() {
             filter: path.resolve('./build/filter.js'),
             //筛选结果页
             filterResult: path.resolve('./build/filterResult.js'),
+            //热销排行榜
+            hotCharts: path.resolve('./build/hotCharts.js'),
+            //集团页
+            group: path.resolve('./build/group.js'),
+            //按工况
+            condition: path.resolve('./build/condition.js'),
+            //按工况选车结果
+            conditionResult: path.resolve('./build/conditionResult.js'),
+            //品牌
+            brand: path.resolve('./build/brand.js'),
+            // 排行榜
+            top: path.resolve('./build/top.js'),
+            // 车系页面
+            seriesPage: path.resolve('./build/seriesPage.js'),
         },
         output: {
             path: 'dist',

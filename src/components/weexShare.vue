@@ -73,7 +73,7 @@
             // 设置this.list
             platform.forEach( idx => {
                 this.list.push(this.totalList[idx])
-            })
+			})
         },
         methods: {
             show () {
@@ -113,6 +113,7 @@
                     })
                     this.callBack({platform: 5, status: '0'})
                 } else {
+					this.$emit('tapShare', index)
                     let shareParams = Object.assign({}, this.shareParams)
                     shareParams.platform = String(index)
                     thaw.onShowSharePlatfrom(shareParams, this.callBack.bind(this))

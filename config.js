@@ -1,1 +1,1 @@
-var CURRENT_IP = '192.168.1.221'
+module.exports = '192.168.250.163'

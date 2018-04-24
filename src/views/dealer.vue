@@ -1,11 +1,11 @@
 <template>
     <div class="series-dealer">
         <div v-if="iosTop" class="ios-top"></div>
+
+        <!--标题-->
+        <title :titleName="titleName"></title>
+
         <list style="flex: 1">
-            <header>
-                <!--标题-->
-                <title :titleName="titleName"></title>
-            </header>
             <cell>
                 <!--经销商-->
                 <dealer :seriesId="seriesInfo.F_SeriesId" :locationInfo="locationInfo" :dealerData="dealerData" @selectLocationPop="selectLocationPop" all="1" :el="el"></dealer>
@@ -22,7 +22,6 @@
     let storage = weex.requireModule('storage')
 
     import title from '../components/title.vue'
-    import nav from '../components/nav.vue'
     import dealer from '../components/dealer.vue'
     import selectLocation from '../components/selectLocation.vue'
     import footerInfo from '../components/footerInfo.vue'
@@ -30,7 +29,6 @@
     export default {
         components:{
             title,
-            nav,
             dealer,
             selectLocation,
             footerInfo
@@ -49,7 +47,9 @@
                     cityId:'',
                 },
                 //经销商数据
-                dealerData:{},
+                dealerData:{
+                    notDealer: true
+                },
                 //选择城市弹层显示与隐藏
                 LocationPop:false,
                 //选择地区列表数据
@@ -86,6 +86,11 @@
             }
         },
         created(){
+            //前端监控
+            this.weexLogger('子类车系经销商列表页')
+
+
+            this.showLoading()
 
             //发送PV
             storage.getItem('p4',p4 => {
@@ -133,6 +138,7 @@
 
                             //发送GA
                             this.goUrlGa(weex.config.deviceId,'product.m.360che.com','产品库-子类车系经销商列表页',this.titleName)
+                            this.hideLoading()
                         }
                     });
 
@@ -173,14 +179,14 @@
             },
             //请求经销商数据
             getDealerData(){
-                this.getData(this.ajaxUrl() + '/index.php?r=weex/series/dealer&subCateId=' + this.seriesInfo.F_SubCategoryId + '&seriesId=' + this.seriesInfo.F_SeriesId + '&provinceId=' + this.locationInfo.provinceId + '&cityId=' + this.locationInfo.cityId + '&all=1',(ele) => {
+                this.getData(this.ajaxUrl() + '/index.php?r=weex/series/dealer&subCateId=' + this.seriesInfo.F_SubCategoryId + '&seriesId=' + this.seriesInfo.F_SeriesId + '&provinceId=' + this.locationInfo.provinceId + '&cityId=' + this.locationInfo.cityId + '&all=1&' + new Date().getTime(),(ele) => {
                     if(ele.ok){
                         this.dealerData = ele.data;
-
-                        if(!this.dealerData.list.length){
-                            this.dealerData.notDealer = true;
-                        }else{
+                        const list = this.dealerData.list
+                        if (Array.isArray(list) && list.length) {
                             this.dealerData.notDealer = false;
+                        } else {
+                            this.dealerData.notDealer = true;
                         }
                     }
                 })

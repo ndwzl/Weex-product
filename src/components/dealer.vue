@@ -61,8 +61,12 @@
             </div>
 
             <div v-if="dealerData.notDealer" class="empty-dealer">
-               <text class="empty-dealer-text">当前地区暂无经销商</text>
-                <text class="switch-location" @click="selectLocationPop">点击切换</text>
+                <text class="empty-dealer-text">当地暂无经销商</text>
+                <div class="call" @click="callCompeny">
+                    <image class="call-icon" :src="DefaultImgPath + 'phone-white.png'"></image>
+                    <text class="call-info">买车请致电 4000507675</text>
+                </div>
+                <text class="switch-location" @click="selectLocationPop">切换地区</text>
             </div>
         </div>
 
@@ -102,6 +106,16 @@
             }
         },
         methods:{
+            // 打电话给400
+            callCompeny () {
+                const phone = '4000507675'
+                if(weex.config.env.platform == 'iOS'){
+                    thaw.onGoCall(phone)
+                }else{
+                    this.phoneNumber = phone;
+                    this.openPhoneShow = true;
+                }
+            },
             alert (text) {
                 modal.alert({
                     message: text
@@ -132,7 +146,6 @@
             },
             //打开是否拨打电话弹层
             onGoCall(ele){
-                this.alert()
                 if(this.isProduct){
                     //发送事件请求
                     this.event({
@@ -293,19 +306,17 @@
         padding-right:30px;
     }
     .empty-dealer{
-        height:200px;
+        height: 320px;
+        padding-top: 64px;
+        padding-bottom: 56px;
         align-items: center;
-        justify-content: center;
     }
     .empty-dealer-text{
         color:#999;
         font-size:28px;
     }
     .switch-location{
-        padding-top:20px;
-        padding-right:20px;
-        padding-bottom:20px;
-        padding-left:20px;
+        padding-top:32px;
         color:#586c94;
         font-size:28px;
     }
@@ -398,26 +409,27 @@
         justify-content: center;
         border-top-width:1px;
         border-top-style: solid;
-        border-top-color:#586c94;
+        border-top-color:#FFB889;
         border-right-width:1px;
         border-right-style: solid;
-        border-right-color:#586c94;
+        border-right-color:#FFB889;
         border-bottom-width:1px;
         border-bottom-style: solid;
-        border-bottom-color:#586c94;
+        border-bottom-color:#FFB889;
         border-left-width:1px;
         border-left-style: solid;
-        border-left-color:#586c94;
+        border-left-color:#FFB889;
         border-top-left-radius:8px;
         border-top-right-radius: 8px;
         border-bottom-left-radius: 8px;
         border-bottom-right-radius: 8px;
+        background-color: #FFF5EF;
     }
     /*.footer-price:active{*/
         /*background-color:rgba(0,0,0,.2)*/
     /*}*/
     .footer-price-text{
-        color:#586c94;
+        color:#FF6600;
         font-size:28px;
     }
     .activity{
@@ -532,5 +544,27 @@
         color:#448dea;
         font-weight: bold;
         font-size:32px;
+    }
+    .call {
+        width: 400px;
+        height: 72px;
+        margin-top: 16px;
+        flex-direction: row;
+        align-items: center;
+        justify-content: center;
+        background-color: #FF6600;
+        border-top-left-radius: 80px;
+        border-top-right-radius: 80px;
+        border-bottom-right-radius: 80px;
+        border-bottom-left-radius: 80px;
+    }
+    .call-icon {
+        width: 28px;
+        height: 28px;
+        margin-right: 8px;
+    }
+    .call-info {
+        font-size: 28px;
+        color: #FFFFFF;
     }
 </style>

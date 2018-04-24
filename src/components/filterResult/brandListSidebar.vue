@@ -1,7 +1,7 @@
 <template>
-    <div :class="['sidebar-wraper', iosTop ? 'iosTop' : '']">
-        <div class="sidebar-mask" @click="closeSiderbar"></div>
-        <div class="sidebar" ref="sidebar">
+    <div :class="['sidebar-wraper', iosTop ? 'iosTop' : '', show ? 'sidebar-wraper-show' : '']">
+        <div :class="['sidebar-mask', show ? 'sidebar-mask-show' : '']" @click="closeSiderbar"></div>
+        <div class="sidebar" ref="sidebar" v-if="data">
             <list>
                 <!-- 标题 -->
                 <cell class="header">
@@ -27,16 +27,16 @@
                     <div class="letter">
                         <text class="letter-text">{{data.letters[index]}}</text>
                     </div>
-                    <div v-for="(brand, brandIndex) in brands" :class="['brand-cont', brandIndex ? '' : 'brand-cont-first']" @click="select(brand)">
-                        <image :src="brand.src" class="brand-icon"></image>
+                    <div v-for="(brand, brandIndex) in brands" :class="['brand-cont', brandIndex ? '' : 'brand-cont-first']" @click="select(brand, index, brandIndex)">
+                        <image :src="brand.src || brand.logo" class="brand-icon"></image>
                         <div class="brand-text-wraper">
-                            <text :class="['brand-text', brand.selected ? 'brand-selected' : '']">{{brand.name}}</text>
+                            <text :class="['brand-text', brand.selected ? 'brand-selected' : '']">{{brand.name || brand.F_BrandName}}</text>
                         </div>
                     </div>
                 </cell>
             </list>
             <!-- 右侧品牌字母导航 -->
-            <index-nav :indexNav="data.letters" @anchor="anchor"></index-nav>
+            <index-nav :indexNav="data.letters" @anchor="anchor" @anchorNoAnimation="anchorAnimation"></index-nav>
         </div>
     </div>
 </template>
@@ -48,14 +48,14 @@
     const animation = weex.requireModule('animation')
     export default {
         components: {indexNav},
-        props: ['data', 'brandUnlimit'],
+        props: ['data', 'brandUnlimit', 'show'],
         data () {
             return {
                 iosTop: false
             }
         },
         methods: {
-            select (data) {
+            select (data, index, brandIndex) {
                 // 选择不限
                 if (!data) {
                     data = {
@@ -64,6 +64,8 @@
                         id: ''
                     }
                 }
+                data.index = index
+                data.brandIndex = brandIndex
                 this.$emit('selectType', data, 0, true)
                 this.closeSiderbar()
             },
@@ -75,6 +77,10 @@
             // 按字母选择品牌
             anchor (letter) {
                 dom.scrollToElement(this.$refs[letter][0], { offset: 0 })
+            },
+            // 按字母选择品牌(滑动)
+            anchorAnimation (letter) {
+                dom.scrollToElement(this.$refs[letter][0], { offset: 0, animated: false })
             },
             // 开启关闭侧边栏
             change (translateX = 0, callback) {
@@ -95,9 +101,11 @@
                 this.iosTop = true
             }
         },
-        mounted () {
-            this.change()
-        },
+        watch: {
+            show: function (val) {
+                this.change()
+            }
+        }
     }
 </script>
 
@@ -112,6 +120,10 @@
     right: 0;
     bottom: 0;
     padding-left: 150px;
+    transform: translateX(750px);
+}
+.sidebar-wraper-show {
+    transform: translateX(0);
 }
 .sidebar-mask {
     position: absolute;
@@ -120,6 +132,10 @@
     right: 0;
     bottom: 0;
     background-color: rgba(0, 0, 0, .6);
+    transform: translateX(750px);
+}
+.sidebar-mask-show {
+    transform: translateX(0);
 }
 .sidebar {
     flex: 1;
@@ -228,11 +244,4 @@
 .brand-selected {
     color: #1571e5;
 }
-/*<!-- 品牌列表 -->
-    <div v-for="(brand, brandIndex) in brands" :class="['brand-cont', brandIndex ? '' : 'brand-cont-first']" @click="select(brand)">
-        <image :src="brand.src" class="brand-icon"></image>
-        <div class="brand-text-wraper">
-            <text :class="['brand-text', brand.selected ? 'brand-selected' : '']">{{brand.name}}</text>
-        </div>
-*/
 </style>

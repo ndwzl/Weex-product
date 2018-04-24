@@ -9,7 +9,8 @@
                 <text class="brand-name">{{data.F_BrandName}}</text>
             </div>
             <div v-else="data.list">
-                <div :href="data.url" class="group-name" @click="goUrl(data.url)">
+                <!-- <div :href="data.url" class="group-name" @click="goUrl(data.url)"> -->
+                <div class="group-name" @click="goGroup(data)">
                     <image :src="data.F_BrandGroupImg" style="width:120px;height:80px;"></image>
                     <div class="group-info">
                         <div class="grupu-name-icon">
@@ -34,11 +35,19 @@
 </template>
 
 <script type="text/babel">
+    const storage = weex.requireModule('storage')
     export default {
         props: ['brandListInfo','index'],
         methods:{
             SidebarShow(url){
                 this.$emit('SidebarShow',url)
+            },
+            goGroup (data) {
+                storage.setItem('groupName', data.F_BrandGroupEnName, e => {
+                    if (e.result === 'success') {
+                        this.goWeexUrl('group.weex.js')
+                    }
+                })
             }
         }
     }

@@ -190,6 +190,9 @@
 			}
 		},
 		created(){
+      //前端监控
+      this.weexLogger('添加车系')
+
 //			let cast = weex.requireModule('BroadcastChannel');
 //			this.alert(JSON.stringify(cast))
 

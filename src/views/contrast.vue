@@ -6,7 +6,7 @@
                 <!--标题-->
                 <title titleName="车型对比"></title>
                 <!--对比车型名称-->
-                <product-name :products="configData.products" @clear="clear" :compareNumber="compareNumber"  footerPrice="true" @goAddSeries="addSeriesPop"></product-name>
+                <product-name :footerPrice="1" :products="configData.products" @clear="clear" :compareNumber="compareNumber"  footerPrice="true" @goAddSeries="addSeriesPop"></product-name>
             </header>
             <!--对比车型选项-->
             <cell class="model" ref="车型信息">
@@ -91,7 +91,6 @@
     let storage = weex.requireModule('storage')
 
     import title from '../components/title.vue'
-    import nav from '../components/nav.vue'
     import productName from '../components/config/productName.vue'
     import addSeries from '../components/config/addSeries.vue'
 
@@ -101,7 +100,6 @@
     export default {
         components:{
             title,
-            nav,
             productName,
             addSeries
         },
@@ -134,6 +132,11 @@
             }
         },
         created(){
+            //前端监控
+            this.weexLogger('子类车系对比页')
+
+
+            this.showLoading()
             //监听用户点击安卓物理返回键
             globalEvent && globalEvent.addEventListener("onRespondNativeBack",(e) => {
                 this.goBack();
@@ -172,11 +175,19 @@
                                 //请求车型对比详细信息
                                 this.getData(this.ajaxUrl() + '/index.php?r=weex/product/contrast&proId=' + product, productInfo => {
                                     if (productInfo.ok) {
+                                        this.hideLoading()
                                         productInfo.data.data.forEach((list,index) => {
                                             this.$set(this.configData.paramList, index, list.paramList)
                                             this.$set(this.configData.products, index, list.proInfo)
                                             this.$set(this.configData.lowPrice,index,list.lowPrice)
                                         })
+
+                                        if (this.configData.products.length === 1) {
+                                            this.configData.products.push({
+                                                F_BigPrice: 'kong',
+                                                F_Price: 'kong',
+                                            })
+                                        }
 
                                         //对比的数量
                                         this.compareNumber = productInfo.data.data.length;
@@ -209,25 +220,36 @@
                                         //增加对比pv
                                         if(productInfo.data.data.length == 2){
                                             //发送PV
-                                            storage.getItem('p4',p4 => {
-                                                if(p4.result == 'success'){
-                                                    this.p4 = p4.data;
-                                                    storage.getItem('p5',p5 => {
-                                                        if(p5.result == 'success'){
-                                                            this.p5 = p5.data;
-                                                            this.collect({
-                                                                'p3':p4.data,
-                                                                'p4':4,
-                                                                'p5':encodeURIComponent(productInfo.data.data[0].proInfo.F_SeriesId + '|' + productInfo.data.data[0].proInfo.F_ProductId),
-                                                                'p6':productInfo.data.data[0].proInfo.F_BrandId + '_' + productInfo.data.data[0].proInfo.F_CateId + '_' + productInfo.data.data[0].proInfo.F_SubCategoryId,
-                                                                'p7':encodeURIComponent(productInfo.data.data[1].proInfo.F_SeriesId + '|' + productInfo.data.data[1].proInfo.F_ProductId)
-                                                            })
-                                                        }
-                                                    })
-                                                }
+                                            this.collect({
+                                                'p3': product,
+                                                'p4': 4,
                                             })
+                                            // storage.getItem('p4',p4 => {
+                                            //     if(p4.result == 'success'){
+                                            //         this.p4 = p4.data;
+                                            //         storage.getItem('p5',p5 => {
+                                            //             if(p5.result == 'success'){
+                                            //                 this.p5 = p5.data;
+                                            //                 this.collect({
+                                            //                     'p3': p4.data,
+                                            //                     'p4': 4,
+                                            //                     'p5':encodeURIComponent(productInfo.data.data[0].proInfo.F_SeriesId + '|' + productInfo.data.data[0].proInfo.F_ProductId),
+                                            //                     'p6':productInfo.data.data[0].proInfo.F_BrandId + '_' + productInfo.data.data[0].proInfo.F_CateId + '_' + productInfo.data.data[0].proInfo.F_SubCategoryId,
+                                            //                     'p7':encodeURIComponent(productInfo.data.data[1].proInfo.F_SeriesId + '|' + productInfo.data.data[1].proInfo.F_ProductId)
+                                            //                 })
+                                            //             }
+                                            //         })
+                                            //     }
+                                            // })
                                         }
 
+                                        // 一个车型时 发送大数据统计
+                                        if (productInfo.data.data.length === 1) {
+                                            this.collect({
+                                                'p3': `${product}_`,
+                                                'p4': 4,
+                                            })
+                                        }
 
                                         //查看新添加的车型
 //                                        storage.getItem('newProductId',newProductId => {
@@ -344,6 +366,14 @@
                 //显示隐藏选择车系列表
                 this.addSeriesShow = !this.addSeriesShow;
 
+                if (this.addSeriesShow) {
+                    // 打开的时候发送大数据
+                    this.collect({
+                        p2: 5,
+                        p3: 0,
+                    })
+                }
+
                 //重新给选中车型赋值
                 if(this.compareData.length){
                     this.selectedProductId = this.compareData[0];
@@ -355,7 +385,7 @@
             },
             //选择车型
             selectModel(ele){
-                console.log(ele)
+                this.showLoading()
                 //查看对比缓存
                 storage.getItem('compareData',compareData => {
                     if(compareData.result == 'success'){
@@ -399,26 +429,38 @@
 
                                                 //增加对比pv
                                                 if(productInfo.data.data.length == 2){
-                                                    //发送PV
-                                                    storage.getItem('p4',p4 => {
-                                                        if(p4.result == 'success'){
-                                                            this.p4 = p4.data;
-                                                            storage.getItem('p5',p5 => {
-                                                                if(p5.result == 'success'){
-                                                                    this.p5 = p5.data;
-                                                                    this.collect({
-                                                                        'p3':p4.data,
-                                                                        'p4':4,
-                                                                        'p5':encodeURIComponent(productInfo.data.data[0].proInfo.F_SeriesId + '|' + productInfo.data.data[0].proInfo.F_ProductId),
-                                                                        'p6':productInfo.data.data[0].proInfo.F_BrandId + '_' + productInfo.data.data[0].proInfo.F_CateId + '_' + productInfo.data.data[0].proInfo.F_SubCategoryId,
-                                                                        'p7':encodeURIComponent(productInfo.data.data[1].proInfo.F_SeriesId + '|' + productInfo.data.data[1].proInfo.F_ProductId)
-                                                                    })
-                                                                }
-                                                            })
-                                                        }
+                                                    this.collect({
+                                                        'p3': proId,
+                                                        'p4': 4,
                                                     })
+                                                    //发送PV
+                                                    // storage.getItem('p4',p4 => {
+                                                    //     if(p4.result == 'success'){
+                                                    //         this.p4 = p4.data;
+                                                    //         storage.getItem('p5',p5 => {
+                                                    //             if(p5.result == 'success'){
+                                                    //                 this.p5 = p5.data;
+                                                    //                 this.collect({
+                                                    //                     'p3': p4.data,
+                                                    //                     'p4': 4,
+                                                    //                     'p5':encodeURIComponent(productInfo.data.data[0].proInfo.F_SeriesId + '|' + productInfo.data.data[0].proInfo.F_ProductId),
+                                                    //                     'p6':productInfo.data.data[0].proInfo.F_BrandId + '_' + productInfo.data.data[0].proInfo.F_CateId + '_' + productInfo.data.data[0].proInfo.F_SubCategoryId,
+                                                    //                     'p7':encodeURIComponent(productInfo.data.data[1].proInfo.F_SeriesId + '|' + productInfo.data.data[1].proInfo.F_ProductId)
+                                                    //                 })
+                                                    //             }
+                                                    //         })
+                                                    //     }
+                                                    // })
                                                 }
 
+                                                // 一个车型时 发送大数据统计
+                                                if (productInfo.data.data.length === 1) {
+                                                    this.collect({
+                                                        'p3': `${proId}_`,
+                                                        'p4': 4,
+                                                    })
+                                                }
+                                                
                                                 //存储对比记录
                                                 storage.getItem('compare_history',history => {
                                                     let data = [];
@@ -445,6 +487,7 @@
                                                         this.addSeriesShow = false;
                                                     })
                                                 })
+                                                this.hideLoading()
                                             }
                                         })
                                     }

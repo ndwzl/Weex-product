@@ -1,7 +1,7 @@
 <template>
     <div class="truck-image"  @click="goWeex">
-        <image v-if="truckImageData.imgSrc" :src="truckImageData.imgSrc" style="width:750px;height: 500px" placeholder="https://s.kcimg.cn/wap/images/detail/productApp/placeholder.jpg"></image>
-        <div  v-if="truckImageData.notImg"  class="not-img">
+        <image :src="truckImageData.imgSrc" style="width:750px;height: 500px"></image>
+        <div v-if="truckImageData.notImg" class="not-img">
             <text class="not-img-text">很遗憾~没有相关图片</text>
         </div>
         <div class="img-info">
@@ -58,11 +58,11 @@
 <style scoped>
     .truck-image{
         position:relative;
-        border-top-width:20px;
-        border-top-style:solid;
-        border-top-color:#f5f5f5;
+        height: 500px;
     }
     .not-img{
+        position: absolute;
+        top: 0;
         width:750px;
         height:500px;
         padding-bottom:150px;

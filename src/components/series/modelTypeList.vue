@@ -19,67 +19,75 @@
             </div>
         </div>
         <!--数据列表-->
-        <div class="content">
-            <div class="options">
-                <div v-for="(type, index) in model.attr" :class="['option', model.defaultAttr == type ? 'option-visible' : '', optionNumber == 3 ? 'long-option' : 'short-option']" @click="selectOption(type)">
-                    <text :class="['option-test', model.defaultAttr == type ? 'option-test-visible' : '' ]">{{type}}</text>
-                </div>
-            </div>
-            <div class="wrapper">
-                    <div class="model-filter" v-if="isTruck">
-                        <div class="model-filter-title">
-                            <text class="model-filter-title-text">车型筛选</text>
-                        </div>
-                        <div class="model-filter-operation">
-                            <div class="hot-filter" @click="hotSort">
-                                <text :class="['filter-text', hotType ? 'filter-active' : '']">热度</text>
-                                <image class="filter-image" :src="hotType === 0 ? 'https://s.kcimg.cn/wap/images/detail/productApp/hot-default.png':'https://s.kcimg.cn/wap/images/detail/productApp/hot-down.png'"></image>
-                            </div>
-                            <div class="power-filter" @click="powerSort">
-                                <text :class="['filter-text', powerType ? 'filter-active' : '']">马力</text>
-                                <image v-if="powerType === 0" class="filter-image" src="https://s.kcimg.cn/wap/images/detail/productApp/power-default.png"></image>
-                                <image v-if="powerType === 1" class="filter-image" src="https://s.kcimg.cn/wap/images/detail/productApp/power-down.png"></image>
-                                <image v-if="powerType === 2" class="filter-image" src="https://s.kcimg.cn/wap/images/detail/productApp/power-up.png"></image>
-                            </div>
-                        </div>
-                    </div>
-                    <div v-for="(data, index) in model.list" class="model-list" v-if="index < modelListNumber" @click="goModelInfo(data,'model.weex.js')">
-                        <div :class="['truck-info', index ? '': 'bt0']">
-                            <div class="truck-name">
-                                <text v-if="data.hotLocation" class="truck-name-tag">{{data.hotLocation}}</text>
-                                <text class="truck-name-text">{{data.speaclProName}}</text>
-                            </div>
-                            <div class="guide-price">
-                                <text v-if="data.priceScope" class="guide-price-text">厂商指导价：{{data.priceScope}}</text>
-                                <text v-else="" class="guide-price-text">厂商指导价：{{data.F_Price != 0 ? data.F_Price + data.F_PriceUnit : '暂无'}}</text>
-                                <div class="tags">
-                                    <text v-for="tag in data.paramDetail" class="tag-text">{{tag}}</text>
-                                </div>
-                            </div>
-                            <div class="action">
-                                <div class="" @click="goModelInfo(data,'modelDealer.weex.js')">
-                                    <text class="hot-price">{{data.hotPrice}}</text>
-                                </div>
-                                <div class="action-wrapper">
-                                    <div class="comparison" @click="compare(data.F_ProductId)">
-                                        <!--<text v-if="!compareState[data.F_ProductId]" :style="{fontFamily:'detail',fontSize:'26px',color:'#586c94',marginRight:'5px'}">&#x52a0;</text>-->
-                                        <image v-if="!compareState[data.F_ProductId]" src="https://s.kcimg.cn/wap/images/detail/productApp/add.png" style="width:16px;height:16px;margin-right:5px"></image>
-                                        <text class="comparison-text">{{compareState[data.F_ProductId] ? compareState[data.F_ProductId] : '对比'}}</text>
-                                    </div>
-                                    <div v-if="model.status != '停售'" class="floor-price" @click="goModelInfo(data,'footerPrice.weex.js')">
-                                        <text class="floor-price-text">询底价</text>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="load-more" v-if="model.list.length > modelListNumber" @click="loadMore">
-                        <text class="load-more-text">加载更多</text>
-                        <!--<text :style="{fontFamily:'detail',fontSize:'28px',color:'#999'}">&#x4e0b;</text>-->
-                        <image src="https://s.kcimg.cn/wap/images/detail/productApp/more.png" style="width:24px;height:14px"></image>
-                    </div>
+        <div class="options">
+            <div v-for="(type, index) in model.attr" :class="['option', model.defaultAttr == type ? 'option-visible' : '', optionNumber == 3 ? 'long-option' : 'short-option']" @click="selectOption(type)">
+                <text :class="['option-test', model.defaultAttr == type ? 'option-test-visible' : '' ]">{{type}}</text>
             </div>
         </div>
+        <!-- <div class="wrapper"> -->
+
+
+
+
+            <div class="model-filter" v-if="isTruck">
+                <div class="model-filter-title">
+                    <text class="model-filter-title-text">车型筛选</text>
+                </div>
+                <div class="model-filter-operation">
+                    <div class="hot-filter" @click="hotSort">
+                        <text :class="['filter-text', hotType ? 'filter-active' : '']">热度</text>
+                        <image class="filter-image" :src="hotType === 0 ? 'https://s.kcimg.cn/wap/images/detail/productApp/hot-default.png':'https://s.kcimg.cn/wap/images/detail/productApp/hot-down.png'"></image>
+                    </div>
+                    <div class="power-filter" @click="powerSort">
+                        <text :class="['filter-text', powerType ? 'filter-active' : '']">马力</text>
+                        <image v-if="powerType === 0" class="filter-image" src="https://s.kcimg.cn/wap/images/detail/productApp/power-default.png"></image>
+                        <image v-if="powerType === 1" class="filter-image" src="https://s.kcimg.cn/wap/images/detail/productApp/power-down.png"></image>
+                        <image v-if="powerType === 2" class="filter-image" src="https://s.kcimg.cn/wap/images/detail/productApp/power-up.png"></image>
+                    </div>
+                    <div class="last-filter" @click="lastSort">
+                        <text :class="['filter-text', lastType ? 'filter-active' : '']">最新</text>
+                    </div>
+                </div>
+            </div>
+            <div v-for="(data, index) in model.list" class="model-list" v-if="index < modelListNumber" @click="goModelInfo(data,'model.weex.js')">
+                <div :class="['truck-info', index ? '': 'bt0']">
+                    <div class="truck-name">
+                        <text v-if="data.hotLocation" class="truck-name-tag">{{data.hotLocation}}</text>
+                        <text class="truck-name-text">{{data.speaclProName}}</text>
+                    </div>
+                    <div class="guide-price">
+                        <text v-if="data.priceScope" class="guide-price-text">厂商指导价：{{data.priceScope}}</text>
+                        <text v-else class="guide-price-text">厂商指导价：{{data.F_Price != 0 ? data.F_Price + data.F_PriceUnit : '暂无'}}</text>
+                        <div class="tags">
+                            <text class="tag-text">{{data.paramDetail}}</text>
+                        </div>
+                    </div>
+                    <div class="action">
+                        <div class="" @click="goModelInfo(data,'modelDealer.weex.js')">
+                            <text class="hot-price">{{data.hotPrice}}</text>
+                        </div>
+                        <div class="action-wrapper">
+                            <div class="comparison" @click="compare(data.F_ProductId)">
+                                <!--<text v-if="!compareState[data.F_ProductId]" :style="{fontFamily:'detail',fontSize:'26px',color:'#586c94',marginRight:'5px'}">&#x52a0;</text>-->
+                                <image v-if="!compareState[data.F_ProductId]" src="https://s.kcimg.cn/wap/images/detail/productApp/add.png" style="width:16px;height:16px;margin-right:5px"></image>
+                                <text class="comparison-text">{{compareState[data.F_ProductId] ? compareState[data.F_ProductId] : '对比'}}</text>
+                            </div>
+                            <div v-if="model.status != '停售'" class="floor-price" @click="goModelInfo(data,'footerPrice.weex.js')">
+                                <text class="floor-price-text">询底价</text>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="load-more" v-if="model.list.length > modelListNumber" @click="loadMore">
+                <text class="load-more-text">加载更多</text>
+                <!--<text :style="{fontFamily:'detail',fontSize:'28px',color:'#999'}">&#x4e0b;</text>-->
+                <image src="https://s.kcimg.cn/wap/images/detail/productApp/more.png" style="width:24px;height:14px"></image>
+            </div>
+
+
+
+        <!-- </div> -->
         <div :class="['compare',compareNumber == 0 ? 'compare-hide' : '']" ref="compare" @click="goCompare">
             <text class="compare-text">对比  ({{compareNumber}})</text>
         </div>
@@ -87,7 +95,6 @@
 </template>
 
 <script type="text/babel">
-    import store from '../../store'
     let stream = weex.requireModule('stream');
     let modal = weex.requireModule('modal');
     let storage = weex.requireModule('storage');
@@ -127,11 +134,22 @@
                 hotType: 1,
                 // 车型筛选的马力排序
                 powerType: 0,
+                // 车型筛选的最新排序
+                lastType: 0,
                 // 是否卡车 不是卡车隐藏筛选功能
                 isTruck: false,
             }
         },
         methods:{
+            // 点击最新排序
+            lastSort () {
+                if (!this.lastType) {
+                    this.lastType = 1
+                    this.hotType = this.powerType = 0
+                    this.updateInfo()
+                }
+                this.eventGa(weex.config.deviceId, '子类车系综述页', '点击最新', '')
+            },
             // 更新页面数据
             updateInfo (isSellState) {
                 const url = `https://product.360che.com/index.php?r=weex/series/price-list${this.getParams(isSellState)}`
@@ -154,7 +172,7 @@
                     [1, '3'],
                     [2, '4'],
                 ]);
-                order = hash.get(this.powerType)
+                order = this.lastType ? '8' : hash.get(this.powerType)
                 if (!isSellState) {
                     let computeAttr = this.model.defaultAttr === '底盘' ? '10' : this.model.defaultAttr
                     attr = `&attr=${encodeURI(computeAttr)}`
@@ -166,8 +184,16 @@
                 if(res.ok){
                     //替换model 渲染数据
                     if (res.data.list) {
+                        // tags处理
+                        res.data.list.forEach(item => {
+                            item.paramDetail = (item.paramDetail && item.paramDetail.length) ? item.paramDetail.join(' ') : ''
+                        })
                         this.model = res.data
                     } else {
+                        // tags处理
+                        res.data.forEach(item => {
+                            item.paramDetail = (item.paramDetail && item.paramDetail.length) ? item.paramDetail.join(' ') : ''
+                        })
                         this.model.list = res.data
                     }
                     //请求地区热门车型
@@ -177,16 +203,17 @@
             // 热度排序
             hotSort () {
                 // 设置非马力排序
-                [this.hotType, this.powerType] = [1, 0]
+                [this.hotType, this.powerType, this.lastType] = [1, 0, 0]
                 this.updateInfo()
             },
             // 马力排序
             powerSort () {
                 // 设置非热度排序
-                this.hotType = 0
+                this.hotType = this.lastType = 0
                 // 判断需要请求哪种马力排序
                 // powerType：0非马力排序, 1马力从高到低, 2马力从低到高
                 this.powerType = this.powerType === 1 ? 2 : 1
+
                 this.updateInfo()
             },
             //发送请求
@@ -199,7 +226,7 @@
             },
             selectSellState(index, status){
                 // 初始化排序条件为热度
-                [this.hotType, this.powerType, this.sellState, this.model.status] = [1, 0, index, status]
+                [this.hotType, this.powerType, this.lastType, this.sellState, this.model.status] = [1, 0, 0, index, status]
                 this.updateInfo(true)
             },
             //选择当前状态 4*2 || 6*2 || 6*4
@@ -475,10 +502,15 @@
                 this.seriesId = this.seriesInfo.F_SubCategoryId
                 //请求默认车型列表数据
                 // `${this.ajaxUrl()}/index.php?r=weex/series/price&subCateId=${this.seriesInfo.F_SubCategoryId}&seriesId=${this.seriesInfo.F_SeriesId}`
-                this.getData(`https://product.360che.com/index.php?r=weex/series/price-list&subId=${this.seriesInfo.F_SubCategoryId}&seriesId=${this.seriesInfo.F_SeriesId}`, ele => {
+                this.getData(`${this.ajaxUrl()}/index.php?r=weex/series/price-list&subId=${this.seriesInfo.F_SubCategoryId}&seriesId=${this.seriesInfo.F_SeriesId}&version=20171109`, ele => {
                     if (ele.ok) {
                         // 默认是在售状态
-                        [this.sellState, this.model, this.isTruck] = [0, ele.data, ele.data.isTruck]
+                        ele.data.list.forEach(item => {
+                            item.paramDetail = (item.paramDetail && item.paramDetail.length) ? item.paramDetail.join(' ') : ''
+                        })
+                        this.sellState = 0
+                        this.model = ele.data
+                        this.isTruck = ele.data.isTruck
                     }
                 })
             },
@@ -488,7 +520,7 @@
             if(weex.config.deviceWidth <= 320){
                 this.optionNumber = 3;
             };
-
+            
             //获取对比存储数据
             storage.getItem('compareTask',(comper) => {
                 if(comper.result == 'success'){
@@ -609,6 +641,9 @@
         padding-left:10px;
         padding-right:10px;
         flex-wrap: wrap;
+        border-bottom-width:20px;
+        border-bottom-style: solid;
+        border-bottom-color:#f5f5f5;
     }
     .option{
         height:60px;
@@ -693,7 +728,7 @@
         flex-direction: row;
         justify-content: space-between;
         align-items: center;
-        width: 186px;
+        width: 272px;
     }
     .power-filter, .hot-filter {
         flex-direction: row;
@@ -712,6 +747,9 @@
     }
     .filter-active {
         color: #1571E5;
+    }
+    .last-filter {
+
     }
 
     .model-list{
@@ -756,14 +794,18 @@
     }
     .tags{
         margin-bottom:-4px;
-        flex-direction:row;
         justify-content: center;
         align-items: center;
+        flex-direction:row;   
+        width: 300px;
     }
     .tag-text{
-        margin-left:15px;
         color:#999;
         font-size:24px;
+        width: 315px;
+        lines: 1;
+        text-overflow: ellipsis;
+        text-align: right;
     }
     .load-more{
         height:80px;
@@ -818,26 +860,27 @@
         align-items:center;
         border-top-width:1px;
         border-top-style:solid;
-        border-top-color:#586C94;
+        border-top-color:#FFB889;
         border-right-width:1px;
         border-right-style:solid;
-        border-right-color:#586C94;
+        border-right-color:#FFB889;
         border-bottom-width:1px;
         border-bottom-style:solid;
-        border-bottom-color:#586C94;
+        border-bottom-color:#FFB889;
         border-left-width:1px;
         border-left-style:solid;
-        border-left-color:#586C94;
+        border-left-color:#FFB889;
         border-top-left-radius: 8px;
         border-top-right-radius:8px;
         border-bottom-left-radius:8px;
         border-bottom-right-radius:8px;
+        background-color: #FFF5EF;
     }
     /*.floor-price:active{*/
         /*background-color:rgba(0,0,0,.2)*/
     /*}*/
     .floor-price-text{
-        color:#586C94;
+        color: #FF6600;
         font-size:28px;
     }
     .keep-alive{

@@ -1,14 +1,14 @@
 <template>
     <div :class="['sidebar-wraper', iosTop ? 'iosTop' : '']">
         <div class="sidebar-mask" @click="closeSiderbar"></div>
-        <div class="sidebar" ref="sidebar">
+        <div class="sidebar" ref="sidebar" v-if="data">
             <list>
                 <cell class="header">
                     <div class="header-title">
                         <text class="header-title-text">{{data.info.name}}</text>
                     </div>
                     <div class="header-cont" @click="goSeries">
-                        <image :src="data.info.img" resize="cover" class="header-cont-pictrue"></image>
+                        <image :src="data.info.img" :placeholder="`${DefaultImgPath}placeholder.jpg`" resize="cover" class="header-cont-pictrue"></image>
                         <div class="header-cont-right">
                             <div class="header-cont-price" v-if="data.info.priceScope.min && data.info.priceScope.max">
                                 <text class="header-cont-price-text">{{data.info.priceScope.min}}~{{data.info.priceScope.max}}</text>
@@ -21,6 +21,16 @@
                                 <text class="header-cont-go-series-text">进入车系</text>
                             </div>
                         </div>
+                    </div>
+                </cell>
+
+                <cell class="power-filter" v-if="data.isShow">
+                    <div class="power-filter-title">
+                        <text class="power-filter-title-text">按马力筛选</text>
+                    </div>
+                    <div class="power-filter-content" @click="updateOrder">
+                        <text class="power-filter-content-text">马力</text>
+                        <image class="power-filter-content-icon" :src="DefaultImgPath + orderIcon"></image>
                     </div>
                 </cell>
 
@@ -44,13 +54,13 @@
                                 </div>
                                 <div class="consult-floor-price" @click="goConsultFloorPrice(model.id)">
                                     <text class="consult-floor-price-text">询底价</text>
-                                    <image src="https://s.kcimg.cn/wap/images/detail/productApp/go-f60.png" class="consult-floor-price-icon"></image>
+                                    <image :src="DefaultImgPath + 'go-f60.png'" class="consult-floor-price-icon"></image>
                                 </div>
                             </div>
                         </div>
                         <div class="load-more" v-if="listLoadmore[index] <  data.list[index].length" @click="addShowLength(index)">
                             <text class="load-more-text">点击加载更多车型</text>
-                            <image src="https://s.kcimg.cn/wap/images/detail/productApp/launch.png" class="load-more-icon"></image>
+                            <image :src="DefaultImgPath + 'launch.png'" class="load-more-icon"></image>
                         </div>
                     </div>
                 </cell>
@@ -66,7 +76,7 @@
     const animation = weex.requireModule('animation')
     export default {
         components: {indexNav},
-        props: ['data'],
+        props: ['data', 'orderIcon'],
         data () {
             return {
                 cacheStorage: false,
@@ -76,6 +86,18 @@
             }
         },
         methods: {
+            updateOrder () {
+                let order,icon
+                if (this.orderIcon === 'power-default.png' || this.orderIcon === 'power-up.png') {
+                    order = 3
+                    icon = 'power-down.png'
+                } else {
+                    order = 4
+                    icon = 'power-up.png'
+                }
+                this.$emit('updateOrder', order, icon)
+                this.resetListLoadmore()
+            },
             goSeries () {
                 this.goWeexUrl('series.weex.js')
             },
@@ -98,6 +120,7 @@
             closeSiderbar () {
                 this.change('600px', () => {
                     this.$emit('seriesSidebarChange')
+                    this.$emit('resetOrder')
                 })
             },
             // 开启关闭侧边栏
@@ -117,16 +140,22 @@
                 let backup = [...this.listLoadmore]
                 backup[index] += 5
                 this.listLoadmore = backup
+            },
+            // 重置计数数组
+            resetListLoadmore () {
+                this.listLoadmore = [...this.listLoadmore].map( num => num = 5 )
             }
         },
         created () {
             if (this.isIos()) {
                 this.iosTop = true
             }
+
             // 默认显示前5个
             this.data.list.forEach(arr => {
                 this.listLoadmore.push(5)
             })
+
             const seriesInfo = {
                 F_SubCategoryId: this.data.info.subId,
                 F_SeriesId: this.data.info.id,
@@ -368,4 +397,47 @@
 .item-first {
     border-top-width: 0;
 }
+
+/*马力筛选*/
+.power-filter {
+    height: 80px;
+    flex-direction: row;
+    justify-content: space-between;
+    padding-left: 30px;
+    border-top-width: 1px;
+    border-top-style: solid;
+    border-top-color: rgb(245, 245, 245);
+    background-color: #fff;
+}
+.power-filter-title {
+    height: 80px;
+}
+.power-filter-title-text {
+    line-height: 80px;
+    font-size: 28px;
+    color: #8a9199;
+}
+.power-filter-content {
+    flex-direction: row;
+    align-items: center;
+}
+.power-filter-content-text {
+    font-size: 28px;
+    color: #999;
+}
+.power-filter-content-icon {
+    width: 20px;
+    height: 26px;
+    margin-right: 18px;
+    margin-left: 4px;
+}
+/*<cell class="power-filter">
+    <div class="power-filter-title">
+        <text class="power-filter-title-text">按马力筛选</text>
+    </div>
+    <div class="power-filter-content">
+        <text class="power-filter-content-text">马力</text>
+        <image class="power-filter-content-icon" :src="DefaultImgPath + orderIcon"></image>
+    </div>
+</cell>*/
 </style>

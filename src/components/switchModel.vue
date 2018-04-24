@@ -1,33 +1,31 @@
 <template>
     <div class="switch-model" v-if="switchModelPop">
         <div v-if="iosTop" class="ios-top"></div>
+        <div class="title">
+            <div class="back" @click="switchModelShow">
+                <!--<text :style="{fontFamily:'detail',fontSize:'32px',color:'#333'}">回</text>-->
+                <image src="https://s.kcimg.cn/wap/images/detail/productApp/back.png" style="width:20px;height:36px"></image>
+            </div>
+            <div class="wrapper" >
+                <text class="title-name">换车型</text>
+            </div>
+            <div v-if="all" class="all-product" @click="allProduct">
+                <text class="all-product-text">全部车型</text>
+            </div>
+        </div>
+        <div class="options" v-if="switchModelData.attrList && switchModelData.attrList.length">
+            <div v-for="(ele,index) in switchModelData.attrList" :class="['option',selected ==  switchModelData.attrList[index] ? 'selected-option' : '']" @click="selectOption(index)">
+                <text :class="['option-text',selected == switchModelData.attrList[index] ? 'selected-option-text' : '']">{{ele}}</text>
+            </div>
+        </div>
         <list style="flex: 1" >
-            <header>
-                <div class="title">
-                    <div class="back" @click="switchModelShow">
-                        <!--<text :style="{fontFamily:'detail',fontSize:'32px',color:'#333'}">回</text>-->
-                        <image src="https://s.kcimg.cn/wap/images/detail/productApp/back.png" style="width:20px;height:36px"></image>
-                    </div>
-                    <div class="wrapper" >
-                        <text class="title-name">换车型</text>
-                    </div>
-                    <div v-if="all" class="all-product" @click="allProduct">
-                        <text class="all-product-text">全部车型</text>
-                    </div>
-                </div>
-                <div class="options" v-if="switchModelData.attrList && switchModelData.attrList.length">
-                    <div v-for="(ele,index) in switchModelData.attrList" :class="['option',selected ==  switchModelData.attrList[index] ? 'selected-option' : '']" @click="selectOption(index)">
-                        <text :class="['option-text',selected == switchModelData.attrList[index] ? 'selected-option-text' : '']">{{ele}}</text>
-                    </div>
-                </div>
-            </header>
             <cell>
-                <div class="switch-model-content" v-for="(ele,index) in switchModelData.priceList" v-if="selected == switchModelData.attrList[index]">
+                <div class="switch-model-content" v-for="(ele,index) in switchModelData.priceList" v-if="selected == switchModelData.attrList[index] || selected === 'none'">
                     <div v-for="(res,index) in ele.list" class="switch-model-list" @click="goSwitchModel(res.F_ProductId)">
                         <!--<div class="model-name">-->
                             <text :class="['model-name-text',res.F_ProductId == ProductId ? 'selected-model-name' : '']">{{res.specialProName}}</text>
                         <!--</div>-->
-                        <div class="tags" v-if="switchModelData.attrList.length">
+                        <div class="tags" v-if="switchModelData.attrList.length || selected === 'none'">
                             <div class="tags-wrapper">
                                 <text v-for="tag in res.paramDetail" class="tag">{{tag}}</text>
                             </div>
@@ -40,6 +38,12 @@
                     </div>
                     <!--v-if="switchModelData.attrList[index].length"-->
                 </div>
+                <div class="empty-wrapper" v-if="emptyList">
+                    <div class="empty">
+                        <image src="https://s.kcimg.cn/wap/images/app_icon/bad.png" style="width:155px;height:100px;"></image>
+                        <text class="empty-text">很遗憾~ 没有相关内容~</text>
+                    </div>
+                </div>
             </cell>
         </list>
     </div>
@@ -51,7 +55,7 @@
     let storage = weex.requireModule('storage')
 
     export default {
-        props:['switchModelPop','switchModelData','ProductId','imgSwitchModel','all'],
+        props:['switchModelPop','switchModelData','ProductId','imgSwitchModel','all','emptyList'],
         data(){
             return {
 //                //换车型数据
@@ -150,6 +154,9 @@
 </script>
 
 <style scoped>
+    .empty-wrapper {
+        margin-top: 20px;
+    }
     .switch-model{
         flex: 1;
         position:fixed;

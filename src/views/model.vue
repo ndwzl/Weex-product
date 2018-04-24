@@ -1,13 +1,11 @@
 <template>
-    <div  class="model">
+    <div class="model">
         <div v-if="iosTop" class="ios-top"></div>
 
+        <title @shareToggle="shareShow" :titleName="titleName" :shareData="shareData" :ProductId="ProductId" :el="el"></title>
+
         <list style="flex: 1">
-            <header ref="goTop">
-                <title needShare="1" @shareToggle="shareShow" :titleName="titleName" :shareData="shareData" :ProductId="ProductId" :el="el"></title>
-            </header>
-            <cell>
-                <nav :navList="navList"></nav>
+            <cell ref="goTop">
                 <truck-image :truckImageData="truckImageData" url="modelPhoto.weex.js"></truck-image>
                 <div class="model-info">
                     <div class="model-name">
@@ -26,6 +24,7 @@
                         <text class="quote-price">{{ele.price}}</text>
                     </div>
                 </div>
+                <nav :navList="navList"></nav>
                 <!--参数配置-->
                 <parameterConfig :parameterData="parameterData" :moreParamUrl="moreParamUrl"></parameterConfig>
             </cell>
@@ -35,7 +34,7 @@
                 <!--经销商-->
                 <dealer :locationInfo="locationInfo" :dealerData="dealerData" @selectLocationPop="selectLocationPop" sum="false" :el="el" isProduct="true"></dealer>
                 <!--其他人还关注-->
-                <other-concerns :otherData="otherData[otherIndex]" :exchangeButton="exchangeButton" @exchange="exchange" :el="el" @goModel="goModel" :ProductId="ProductId"></other-concerns>
+                <other-concerns fromModelPage="1" :otherData="otherData[otherIndex]" :exchangeButton="exchangeButton" @exchange="exchange" :el="el" @goModel="goModel" :ProductId="ProductId"></other-concerns>
             </cell>
         </list>
         <!--选地区弹层-->
@@ -49,7 +48,7 @@
             <text class="compare-text">对比  ({{compareNumber}})</text>
         </div>
         <!-- weex分享 -->
-        <weexShare :shareParams="shareData" :showShare="showShare" @shareCallBack="shareCallBack"></weexShare>
+        <weexShare :shareParams="shareData" :showShare="showShare" @shareCallBack="shareCallBack" @tapShare="tapShare"></weexShare>
     </div>
 </template>
 
@@ -92,24 +91,25 @@
                 //导航列表
                 navList:[
                     {
-                        name: '综述',
-                        url: 'model.weex.js',
-                        selected: true
-                    },
-                    {
                         name: '配置',
                         url: 'modelConfig.weex.js',
-                        selected: false
+						icon: 'nav-config.png',
+						width: '56px',
+						height: '42px'
                     },
                     {
                         name: '图片',
                         url: 'modelPhoto.weex.js',
-                        selected: false
+						icon: 'nav-photo.png',
+						width: '54px',
+						height: '46px'
                     },
                     {
                         name: '经销商',
                         url: 'modelDealer.weex.js',
-                        selected: false
+						icon: 'nav-dealer.png',
+						width: '56px',
+						height: '46px'
                     }
                 ],
                 //车型id
@@ -173,7 +173,9 @@
                     cityId:'',
                 },
                 //经销商数据
-                dealerData:{},
+                dealerData:{
+                    notDealer: true
+                },
                 //选择城市弹层显示与隐藏
                 LocationPop:false,
                 //选择地区列表数据
@@ -218,6 +220,30 @@
             }
         },
         methods:{
+			// 点击分享
+			tapShare (platform) {
+				this.sendBigData(0, String(platform))
+			},
+			// 发送大数据统计 
+            sendBigData (isSuccess, platform) {
+				// ['微信好友', '微信朋友圈', 'QQ好友', 'QQ空间', '新浪微博', '复制链接']
+				// p3= 分享对象   1: 微信好友 2: 微信群  3: 朋友圈 4：Q空间   5: QQ好友 6：新浪微博   7:卡友圈   8：复制链接
+				const map = new Map([
+					['0', 1],
+					['1', 3],
+					['2', 5],
+					['3', 4],
+					['4', 6],
+					['5', 8],
+				])
+				let param = {
+					p1: 3,
+                    p2: this.ProductId,
+					p3: map.get(platform),
+					p4: isSuccess,
+                }
+                this.collect(param)
+            },
             shareShow () {
                 this.showShare = true
             },
@@ -226,7 +252,8 @@
                 if (data.status === '0') {
                     const platformList = ['微信好友', '微信朋友圈', 'QQ好友', 'QQ空间', '新浪微博', '复制链接']
                     const platform = platformList[data.platform]
-                    this.eventGa(weex.config.deviceId, '分享产品库成功', this.el, platform)
+					this.eventGa(weex.config.deviceId, '分享产品库成功', this.el, platform)
+					this.sendBigData(1, data.platform)
                 }
             },
             //请求车型数据
@@ -311,8 +338,8 @@
                             this.getData(this.ajaxUrl() + '/index.php?r=api/getcompeteproduct&productId=' + this.ProductId + '&num=2&size=5&isW=1',ele => {
                                 if(ele.ok && ele.data.info == 'ok'){
                                     this.otherData = this.otherData.concat(ele.data.data)
-
-                                    if(this.otherData.length < 2){
+                                    
+                                    if(ele.data.total < 2 || this.otherData.length < 2){
                                         this.exchangeButton = false;
                                     }
                                 }
@@ -364,8 +391,6 @@
                             })
                             this.$set(this.switchModelData, 'paramName', paramName);
                         }
-                        //隐藏加载loading
-                        this.hideLoading()
                     }
                 })
 
@@ -378,8 +403,7 @@
             examineSimilar(){
                 //锚点跳转到全部相似车型
                 let examine = this.$refs['examine'];
-                dom.scrollToElement(examine, {offset: -68})
-                // dom.scrollToElement(this.$refs['examine'][0], {offset: 0})
+                dom.scrollToElement(examine, {offset: 20})
 
                 // 遍历删选条件 如果有条件就不显示所有数据
                 for(key in this.optionCondition){
@@ -397,8 +421,6 @@
             //点击换车型弹层车型列表
             goSwitchModel(ProductId){
                 this.switchModelPop = false;
-                //显示加载loading
-                this.showLoading();
                 //切换车型id
                 this.ProductId = ProductId;
                 this.footerInfo.productId = ProductId;
@@ -409,153 +431,10 @@
                 //存储询底价车型id
                 storage.setItem('priceProductId',ProductId);
 
-                //发送PV
-//                storage.getItem('p4',p4 => {
-//                    if(p4.result == 'success'){
-//                        this.p4 = p4.data;
-//                        storage.getItem('p5',p5 => {
-//                            if(p5.result == 'success'){
-//                                this.p5 = p5.data;
-//                                this.collect({
-//                                    'p3':p4.data,
-//                                    'p4':0,
-//                                    'p5':p5.data,
-//                                    'p6':'#' + this.ProductId
-//                                })
-//                            }
-//                        })
-//                    }
-//                })
-
-
                 //请求经销商数据
                 this.getDealerData();
 
                 this.getModelData();
-
-                //请求车型数据
-//                this.getData(this.ajaxUrl() + '/index.php?r=weex/product/price/&proId=' + this.ProductId + '&provinceId=' + this.locationInfo.provinceId + '&cityId=' + this.locationInfo.cityId,(ele) => {
-//                    if(ele.ok){
-//                        //标题
-//                        this.titleName = ele.data.proInfo.F_ProductName;
-//                        //图片数据
-//                        this.truckImageData.imgSrc = ele.data.proInfo.imgSrc;
-//                        //如果图片为空
-//                        if(!this.truckImageData.imgSrc){
-//                            this.truckImageData.notImg = true;
-//                        }
-//                        this.truckImageData.rank = ele.data.rank;
-//                        this.truckImageData.imgTotal = ele.data.proInfo.F_ImagesCount;
-//                        this.truckImageData.priceScope.price = ele.data.proInfo.F_Price;
-//                        this.truckImageData.priceScope.imgUrl = ele.data.proInfo.imgUrl;
-//                        this.truckImageData.imgUrl = ele.data.proInfo.imgUrl;
-//
-//                        //判断车型是不是停售
-//                        if(ele.data.proInfo.F_IsStopMake == 4){
-//                            this.footerInfo.footerPrice = false;
-//                        }else{
-//                            this.footerInfo.footerPrice = true;
-//                        }
-//                        //车型简称
-//                        this.simName = ele.data.proInfo.simName;
-//                        if(this.simName == ''){
-//                            this.simName = ele.data.proInfo.F_ProductName
-//                        }
-//
-//                        //本地经销商参考价
-//                        this.areaPrice = ele.data.areaPrice
-//
-//                        //查看相似车型数量
-//                        this.gatherTotal = ele.data.gatherTotal;
-//                        //参数配置数据
-//                        this.parameterData = ele.data.mainParam;
-//                        //查看详细参数配置url
-//                        this.moreParamUrl = ele.data.moreParamUrl;
-//
-//                        //相似车型可选配置数据
-//                        this.examineSimliarData.options = ele.data.gatherProParams;
-//                        this.examineSimliarData.content = ele.data.gatherProList;
-//
-//                        //选地区数据
-//                        this.locationData = ele.data.provinceList;
-//
-//                        //其他人还关注
-//                        this.otherData.push(ele.data.competeProduct);
-//                        //请求其他人还关注第二页信息
-//                        if(this.otherData[0].length){
-//                            this.getData(this.ajaxUrl() + '/index.php?r=api/getcompeteproduct&productId=' + this.ProductId + '&num=2&size=5&isW=1&noCache=1',ele => {
-//                                if(ele.ok && ele.data.info == 'ok'){
-//                                    this.otherData = this.otherData.concat(ele.data.data)
-//                                    if(this.otherData.length < 2){
-//                                        this.exchangeButton = false;
-//                                    }
-//                                }
-//                            })
-//                        }
-//
-//
-//                        //获取询底价人数信息
-//                        this.footerInfo.askTotal = ele.data.askNum;
-//
-//                        //分享数据
-//                        this.shareData.title = this.titleName;// 分享标题
-//                        this.shareData.desc = ele.data.title;//分享副标题
-//                        this.shareData.link = ele.data.indexUrl; //分享的url
-//                        this.shareData.imgUrl = this.truckImageData.imgSrc; //分享的图片url
-//
-//                        //缓存询底价信息
-//                        storage.setItem('modelFooterInfo',JSON.stringify(this.footerInfo))
-//                    }
-//                });
-//
-//                //请求换车型数据
-//                this.getData(this.ajaxUrl() + '/index.php?r=weex/product/get-product-change-list&subId=' +  this.seriesInfo.F_SubCategoryId + '&seriesId=' + this.seriesInfo.F_SeriesId + '&proId=' + this.ProductId,(ele) => {
-//                    if(ele.ok){
-//                        //换车型列表数据
-//                        this.switchModelData.priceList = ele.data.priceList;
-//                        //换车型标题数据
-//                        this.switchModelData.attrList = ele.data.attrList
-//                        //当前显示的是哪一个
-//                        if(ele.data.paramName){
-//                            this.switchModelData.paramName = ele.data.paramName;
-//                        }else{
-//                            //判断哪一个的length最长显示哪一个
-//                            let paramName = '';
-//                            let has = true;
-//                            ele.data.priceList.forEach((res,index) => {
-//                                if (has) {
-//                                    has = false;
-//                                    paramName = ele.data.attrList[index];
-//                                    ele.data.priceList.forEach((r,i) => {
-//                                        if (ele.data.priceList[index].list.length < ele.data.priceList[i].list.length) {
-//                                            paramName = ele.data.attrList[i];
-//                                        }
-//                                    })
-//
-//                                }
-//                            })
-//                            this.$set(this.switchModelData, 'paramName', paramName);
-//                        }
-//
-//                        //隐藏加载loading
-//                        this.hideLoading()
-//                    }
-//                })
-
-//                //其他人还关注
-//                this.getData(this.ajaxUrl() + '/index.php?r=api/getcompeteproduct&productId=' + this.ProductId + '&num=2&size=5',ele => {
-//                    if(ele.ok && ele.data.info == 'ok'){
-//                        this.otherData = ele.data.data
-////                        console.log(this.otherData,'this.otherData')
-//                    }
-//                })
-
-                //切换车型id
-//                storage.setItem('ProductId',ProductId,ele => {
-//                    if(ele.result == 'success'){
-//                        this.goWeexUrl('model.weex.js')
-//                    }
-//                })
             },
             //选择城市后保存已选择城市信息
             getLocationInfo(locationInfo){
@@ -569,15 +448,15 @@
             //请求经销商数据
             getDealerData(){
                 let proId = this.ProductId;
-                this.getData(this.ajaxUrl() + '/index.php?r=weex/series/dealer&subCateId=' + this.seriesInfo.F_SubCategoryId + '&seriesId=' + this.seriesInfo.F_SeriesId + '&provinceId=' + this.locationInfo.provinceId + '&cityId=' + this.locationInfo.cityId + '&proId=' + this.ProductId ,(ele) => {
+                this.getData(this.ajaxUrl() + '/index.php?r=weex/series/dealer&subCateId=' + this.seriesInfo.F_SubCategoryId + '&seriesId=' + this.seriesInfo.F_SeriesId + '&provinceId=' + this.locationInfo.provinceId + '&cityId=' + this.locationInfo.cityId + '&proId=' + this.ProductId + '&' + new Date().getTime(),(ele) => {
                     if(ele.ok){
 //                        this.alert(this.ProductId)
                         this.dealerData = ele.data;
-
-                        if(!this.dealerData.list.length){
-                            this.dealerData.notDealer = true;
-                        }else{
+                        const list = this.dealerData.list
+                        if (Array.isArray(list) && list.length) {
                             this.dealerData.notDealer = false;
+                        } else {
+                            this.dealerData.notDealer = true;
                         }
                     }
                 })
@@ -597,12 +476,6 @@
                                         data[this.seriesId].splice(index, index + 1)
                                         //添加对比的数量
                                         this.compareNumber--;
-
-                                        //如果还剩下一个对比
-//                                        if (data[this.seriesId][0]) {
-//                                            //对比的链接
-//                                            this.compareUrl = 'http://product.m.360che.com/contrast/' + data[this.seriesId][0] + '/';
-//                                        }
                                     }
                                 });
                                 //再次存储
@@ -616,15 +489,6 @@
                                     data[this.seriesId].push(id);
                                     //添加对比的数量
                                     this.compareNumber++;
-
-                                    //判断现在对比的数量有几个
-//                                    if (data[this.seriesId].length == 2) {
-//                                        //对比的链接
-//                                        this.compareUrl = 'http://product.m.360che.com/contrast/' + data[this.seriesId][0] + '_' + data[this.seriesId][1] + '/';
-//                                    } else {
-//                                        //对比的链接
-//                                        this.compareUrl = 'http://product.m.360che.com/contrast/' + data[this.seriesId][0] + '/';
-//                                    }
                                     //再次存储
                                     storage.setItem('compareTask', JSON.stringify(data), () => {
                                         this.$set(this.compareState, id, '已加入')
@@ -733,27 +597,9 @@
                 this.ProductId = ele.F_ProductId;
                 this.optionCondition = {};
 
-//                //发送事件请求
-//                storage.getItem('p4',p4 => {
-//                    if(p4.result == 'success'){
-//                        this.p4 = p4.data;
-//                        storage.getItem('p5',p5 => {
-//                            if(p5.result == 'success'){
-//                                this.p5 = p5.data;
-//                                this.event({
-//                                    'p3' : 1,
-//                                    'p4' : p4.data,
-//                                    'p5' : p5.data,
-//                                    'p6' :'#' + this.ProductId,
-//                                })
-//                            }
-//                        })
-//                    }
-//                })
-
                 //返回页面顶部
                 let goTop = this.$refs['goTop'];
-                dom.scrollToElement(goTop, {offset: 0})
+                dom.scrollToElement(goTop, {offset: 0, animated: false})
 
                 storage.setItem('ProductId',ele.F_ProductId,res => {
 //                    this.goWeexUrl('model.weex.js')
@@ -788,6 +634,9 @@
             }
         },
         created(){
+            //前端监控
+            this.weexLogger('子类车型综述页')
+
             //监听用户点击安卓物理返回键
             globalEvent && globalEvent.addEventListener("onRespondNativeBack",(e) => {
                 this.goBack();
@@ -850,8 +699,6 @@
                         }
                     })
 
-                    //隐藏加载loading
-                    this.hideLoading()
                 }
             });
 
@@ -956,6 +803,9 @@
         border-top-width: 1px;
         border-top-style:solid;
         border-top-color: #eee;
+        border-bottom-width: 1px;
+        border-bottom-style:solid;
+        border-bottom-color: #eee;
     }
     .dealer-quote{
         flex-direction:row;

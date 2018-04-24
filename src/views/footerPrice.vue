@@ -179,6 +179,9 @@
             }
         },
         created(){
+            //前端监控
+            this.weexLogger('询底价页')
+
 
             storage.getItem('priceProductId',ele => {
                 if(ele.result == 'success'){
@@ -205,7 +208,7 @@
                                     'p4':5,
                                     'p5':p5.data,
                                     'p6':this.p6,
-                                    'p7':this.p7
+                                    // 'p7':this.p7
                                 })
                                 clearTimeout(time)
                             }
@@ -221,12 +224,7 @@
                 this.goBack();
             });
 
-            if(weex.config.env.platform == 'iOS'){
-                this.iosTop = true;
-            }
-
-            //发送GA
-           this.goUrlGa(weex.config.deviceId,'product.m.360che.com','产品库-询底价页','询底价')
+            this.iosTop = this.isIos()
 
             //获取车系信息
             storage.getItem('seriesInfo',ele => {
@@ -278,16 +276,20 @@
             this.getData('http://api.dealer.360che.com/inquiryprice/Dealer/getProvinceListAZ.aspx',ele => {
                 if(ele.ok){
                     this.locationData = ele.data
-                    console.log(ele.data)
+                    // console.log(ele.data)
                 }
             })
-
             //线索来源
-            if(weex.config.env.platform == 'android'){
-                this.priceData.clueresource = 21;
-            }else if(weex.config.env.platform == 'iOS'){
-                this.priceData.clueresource = 22;
-            }
+            storage.getItem('appType', res => {
+                if (res.data === 'product') {
+                    this.priceData.clueresource = 32
+                    this.goUrlGa(weex.config.deviceId,'product.app.360che.com','产品库APP-询底价页','询底价')
+                } else {
+                    this.priceData.clueresource = weex.config.env.platform == 'android' ? 21 : 22
+                     //发送GA
+                    this.goUrlGa(weex.config.deviceId,'product.m.360che.com','产品库-询底价页','询底价')
+                }
+            })
         },
         methods:{
             //点击换车型弹层车型列表
@@ -354,7 +356,7 @@
                     }
 
                     //获取推荐经销商
-                    this.getData('https://dealer-api.360che.com/inquiryprice/Dealer/getDealerList.aspx?productid=' + this.priceData.truckid + '&provincesn=' + this.locationInfo.provinceId + '&citysn=' + this.locationInfo.cityId + '&type=1&dealerid=' + dealerId, res => {
+                    this.getData('https://dealer-api.360che.com/inquiryprice/Dealer/getDealerList.aspx?productid=' + this.priceData.truckid + '&provincesn=' + this.locationInfo.provinceId + '&citysn=' + this.locationInfo.cityId + '&type=1&dealerid=' + dealerId + '&' + new Date().getTime(), res => {
                         if(res.ok){
                             this.dealerData = res.data;
 
@@ -575,7 +577,14 @@
                             //存储询底价数据
 //                            this.GA(1,this.priceData.truckid)
                             this.eventGa(weex.config.deviceId,'完成询底价','表单询底价','')
-                            storage.setItem('postFooterPrice',JSON.stringify(this.priceData),ele => {
+                            // 增加牵引车判断 用于询价成功页面是否显示挂车询价模块
+                            if (this.seriesInfo.F_SubCategoryId === '66') {
+                                this.priceData.isTractor = true
+                            }
+                            this.priceData.seriesid = this.productInfo.SeriesId
+                            this.priceData.seriesextendid = this.productInfo.SubCategoryId
+                            this.priceData.TruckName = this.productInfo.Name
+                            storage.setItem('postFooterPrice', JSON.stringify(this.priceData), ele => {
                                 if(ele.result == 'success'){
                                     //跳转到成功页
                                     this.goWeexUrl('success.weex.js')

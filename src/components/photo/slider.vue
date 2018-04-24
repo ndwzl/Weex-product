@@ -4,7 +4,7 @@
             <div class="img-list" v-for="(img,number) in imgList">
                 <!--<text class="img-text" :style="{fontFamily:'detail'}">&#xe602;</text>-->
                 <!--<image src="https://s.kcimg.cn/wap/images/detail/productApp/image-icon.png" style="width:58px;height:58px;"></image>-->
-                <image class="image" v-if="-index == number || (-index - number) == 1 || (number + index) == 1" style="width: 750px;height:500px" resize="cover" :src="img.url"></image>
+                <image class="image" v-if="-index == number || (-index - number) == 1 || (number + index) == 1" style="width: 750px;height:500px" resize="cover" :src="img.url" :ref="'img' + img.F_ImageId"></image>
              </div>
         </div>
     </div>

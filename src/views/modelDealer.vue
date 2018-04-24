@@ -23,7 +23,6 @@
     let globalEvent = weex.requireModule('globalEvent');
 
     import title from '../components/title.vue'
-    import nav from '../components/nav.vue'
     import dealer from '../components/dealer.vue'
     import selectLocation from '../components/selectLocation.vue'
     import footerInfo from '../components/footerInfo.vue'
@@ -31,7 +30,6 @@
     export default {
         components:{
             title,
-            nav,
             dealer,
             selectLocation,
             footerInfo
@@ -52,7 +50,9 @@
                     cityId:'',
                 },
                 //经销商数据
-                dealerData:{},
+                dealerData:{
+                    notDealer: true
+                },
                 //选择城市弹层显示与隐藏
                 LocationPop:false,
                 //选择地区列表数据
@@ -89,14 +89,18 @@
             }
         },
         created(){
+            //前端监控
+            this.weexLogger('子类车型经销商列表页')
+
+
+            this.showLoading()
+
             //监听用户点击安卓物理返回键
             globalEvent && globalEvent.addEventListener("onRespondNativeBack",(e) => {
                 this.goBack();
             });
 
-            if(weex.config.env.platform == 'iOS'){
-                this.iosTop = true;
-            }
+            this.iosTop = this.isIos()
             //获取询底价信息
             storage.getItem('modelFooterInfo',ele => {
                 if(ele.result == 'success'){
@@ -207,16 +211,17 @@
             },
             //请求经销商数据
             getDealerData(){
-                this.getData(this.ajaxUrl() + '/index.php?r=weex/series/dealer&proId=' + this.productId + '&provinceId=' + this.locationInfo.provinceId + '&cityId=' + this.locationInfo.cityId + '&all=1' ,(ele) => {
+                this.getData(this.ajaxUrl() + '/index.php?r=weex/series/dealer&proId=' + this.productId + '&provinceId=' + this.locationInfo.provinceId + '&cityId=' + this.locationInfo.cityId + '&all=1&' + new Date().getTime() ,(ele) => {
                     if(ele.ok){
                         this.dealerData = ele.data;
-
-                        if(!this.dealerData.list.length){
-                            this.dealerData.notDealer = true;
-                        }else{
+                        const list = this.dealerData.list
+                        if (Array.isArray(list) && list.length) {
                             this.dealerData.notDealer = false;
+                        } else {
+                            this.dealerData.notDealer = true;
                         }
                     }
+                    this.hideLoading()
                 })
             }
         }

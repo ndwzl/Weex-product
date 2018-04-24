@@ -2,11 +2,11 @@
     <div class="series-photo">
         <div v-if="iosTop" class="ios-top"></div>
         <!--标题-->
-        <title :titleName="titleName" v-if="notImg"></title>
+        <title @shareToggle="shareShow" :titleName="titleName" :shareData="shareData" :el="el" v-if="notImg"></title>
         <list style="flex: 1;" @loadmore="fetch" loadmoreoffset="100" v-if="!notImg" ref="list">
             <!--标题-->
             <header>
-                <title :titleName="titleName"></title>
+				<title @shareToggle="shareShow" :titleName="titleName" :shareData="shareData" :el="el"></title>
             </header>
             <cell>
                 <!--车型名字和换车型-->
@@ -37,15 +37,16 @@
         </div>
 
         <!--换车型弹层-->
-        <switch-model v-if="switchModelData.paramName || emptyList" all="all" :switchModelPop="switchModelPop" :switchModelData="switchModelData" @goSwitchModel="goSwitchModel" @switchModelShow="switchModelShow" :imgSwitchModel="imgSwitchModel" @allProduct="allProduct"></switch-model>
+        <switch-model v-if="switchModelData.paramName || switchModelData.paramName === 'none' || emptyList" all="all" :emptyList="emptyList" :switchModelPop="switchModelPop" :switchModelData="switchModelData" @goSwitchModel="goSwitchModel" @switchModelShow="switchModelShow" :imgSwitchModel="imgSwitchModel" @allProduct="allProduct"></switch-model>
         <!--底层询底价浮层-->
         <footerInfo :footerInfo="footerInfo" :el="el"></footerInfo>
+		<!-- weex分享 -->
+        <weexShare :shareParams="shareData" :showShare="showShare" @shareCallBack="shareCallBack"></weexShare>
     </div>
 </template>
 
 <script type="text/babel">
     import title from '../components/title.vue'
-    import nav from '../components/nav.vue'
     import photoAlbum from '../components/photoAlbum.vue'
     import switchModel from '../components/switchModel.vue'
     import load from '../components/load.vue'
@@ -58,6 +59,13 @@
     let globalEvent = weex.requireModule('globalEvent');
     let scrollToElement = weex.requireModule('scrollToElement');
     export default {
+        components: {
+            title, 
+            photoAlbum, 
+            switchModel,
+            load,
+            footerInfo
+        },
         data(){
             return {
                 //标题名称
@@ -120,10 +128,18 @@
                 iosTop:false,
                 //统计
                 el:'产品库-子类车系图片列表页',
-                loadimg:true,
+				loadimg:true,
+				showShare: false,
+				// 分享数据
+				shareData: {}
             }
         },
         created(){
+            //前端监控
+            this.weexLogger('子类车系图片列表页')
+
+
+            this.showLoading()
 
             //发送PV
             storage.getItem('p4',p4 => {
@@ -147,7 +163,7 @@
                 this.goBack();
             });
 
-            if(weex.config.env.platform == 'iOS'){
+            if(weex.config.env && weex.config.env.platform == 'iOS'){
                 this.iosTop = true;
             }
             //获取询底价信息
@@ -188,8 +204,16 @@
 //                        }else{
 
                             //请求图片页信息
-                            this.getData(this.ajaxUrl() + '/index.php?r=api/getweekpicturelist&subCateId=' + this.seriesInfo.F_SubCategoryId + '&seriesId=' + this.seriesInfo.F_SeriesId, ele => {
-                                if (ele.ok && ele.data.info == 'ok') {
+                            this.getData(this.ajaxUrl() + '/index.php?r=api/getweekpicturelist&subCateId=' + this.seriesInfo.F_SubCategoryId + '&seriesId=' + this.seriesInfo.F_SeriesId + '&special=1', ele => {
+								if (ele.ok && ele.data.info == 'ok') {
+									//分享数据
+									let shareData = ele.data.share
+									this.shareData = {
+										title: shareData.h1,
+										desc: shareData.title,
+										link: shareData.url,
+										imgUrl: shareData.img,
+									}
                                     //标题
                                     this.titleName = ele.data.title;
                                     //车型名称
@@ -209,14 +233,15 @@
                                     this.titleName = ele.data.title;
                                     this.notImg = true;
                                 }
+                                this.hideLoading()
                             });
 //
 //                        }
 //                    });
 
                     //请求换车型数据
-                    this.getData(this.ajaxUrl() + '/index.php?r=weex/product/get-product-picture-change-list&subId=' +  this.seriesInfo.F_SubCategoryId + '&seriesId=' + this.seriesInfo.F_SeriesId + '&proId=' + this.ProductId,(ele) => {
-                        if(ele.ok){
+                    this.getData(this.ajaxUrl() + '/index.php?r=weex/product/get-product-picture-change-list&subId=' +  this.seriesInfo.F_SubCategoryId + '&seriesId=' + this.seriesInfo.F_SeriesId + '&proId=' + this.ProductId + '&version=20171110a',(ele) => {
+						if(ele.ok){
                             //换车型列表数据
                             this.switchModelData.priceList = ele.data.priceList;
                             //换车型标题数据
@@ -238,7 +263,10 @@
                                                     paramName = ele.data.attrList[i];
                                                 }
                                             })
-
+                                            // 有PriceList 无AttrList
+                                            if (paramName === undefined) {
+                                                paramName = 'none'
+                                            }
                                         }
                                     })
                                     this.$set(this.switchModelData, 'paramName', paramName);
@@ -254,6 +282,18 @@
 
         },
         methods: {
+			shareCallBack (data) {
+                // 分享成功
+                if (data.status === '0') {
+                    const platformList = ['微信好友', '微信朋友圈', 'QQ好友', 'QQ空间', '新浪微博', '复制链接']
+                    const platform = platformList[data.platform]
+                    this.eventGa(weex.config.deviceId, '分享产品库成功', this.el, platform)
+                }
+			},
+			// 分享弹层显示
+            shareShow () {
+                this.showShare = true
+            },
             //请求图片详细分类
             detailed(typeId){
                 //如果有车型id，删除车型id
@@ -264,8 +304,16 @@
                 //重置页数
                 this.photoData.page = 2;
                 //请求图片页信息
-                this.getData(this.ajaxUrl() + '/index.php?r=api/getweekpicturelist&subCateId=' + this.seriesInfo.F_SubCategoryId + '&seriesId=' + this.seriesInfo.F_SeriesId + '&typeId=' + typeId + '&productId=' + this.ProductId, ele => {
-                    if (ele.ok && ele.data.info == 'ok') {
+                this.getData(this.ajaxUrl() + '/index.php?r=api/getweekpicturelist&subCateId=' + this.seriesInfo.F_SubCategoryId + '&seriesId=' + this.seriesInfo.F_SeriesId + '&typeId=' + typeId + '&productId=' + this.ProductId + '&special=1', ele => {
+					if (ele.ok && ele.data.info == 'ok') {
+						//分享数据
+						let shareData = ele.data.share
+						this.shareData = {
+							title: shareData.h1,
+							desc: shareData.title,
+							link: shareData.url,
+							imgUrl: shareData.img,
+						}
                         //标题
                         this.titleName = ele.data.title;
 
@@ -301,7 +349,7 @@
                     this.loadingShow = true;
                     this.loadimg = false;
                     this.getData(this.ajaxUrl() + '/index.php?r=m/ajax/series/ajaxgetseriesimgmore&ajaxurl=%2Findex.php%3Fr%3Dm%2Fajax%2Fseries%2Fajaxgetseriesimgmore&seriesid=' + this.seriesInfo.F_SeriesId + '&subcateid=' + this.seriesInfo.F_SubCategoryId + '&typeid=' + this.photoData.typeId + '&productid=' + this.ProductId + '&page=' + this.photoData.page,(ele) => {
-                       if(ele.ok && ele.data.status == 1){
+					   if(ele.ok && ele.data.status == 1){
                            //数组合并
                            let arr = this.photoData.content[0].imgList.concat(ele.data.data);
                            //设置更新数据
@@ -353,7 +401,6 @@
                 this.detailed(this.photoData.typeId)
             }
         },
-        components: {title, nav, photoAlbum, switchModel,load,footerInfo}
     }
 </script>
 

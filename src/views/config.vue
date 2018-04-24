@@ -1,13 +1,29 @@
 <template>
     <div class="config">
         <div v-if="iosTop" class="ios-top"></div>
-        <list style="flex:1" @scroll="sticky">
-            <header>
-                <!--标题-->
-                <title :titleName="titleName"></title>
-                <!--对比车型名称-->
-                <product-name :products="configData.products" :compareNumber="compareNumber" @clear="clear" @goAddSeries="addSeriesPop"></product-name>
-            </header>
+        <!--标题-->
+        <title @shareToggle="shareShow" :titleName="titleName" :shareData="shareData" :el="el"></title>
+        <!-- 筛选类型 -->
+        <div class="filter-type-wrapper" v-if="isTruck && !hideModelFilter" ref="filterTypeWrapper">
+            <filter-type :list="filterTypeList"  @showSidebar="showFilterSidebar"></filter-type>
+        </div>
+        
+        <!-- 车型筛选折叠、展开 （3大类才有）-->
+        <div class="model-filter" @click="toggleModelFilter" v-if="isTruck">
+            <text class="model-filter-text">车型筛选</text>
+            <image class="model-filter-icon" :src="DefaultImgPath + 'launch.png'" v-if="hideModelFilter"></image>
+            <image class="model-filter-icon" :src="DefaultImgPath + 'packup.png'" v-else></image>
+        </div>
+        <!--对比车型名称-->
+        <div class="product-name-warpper">
+            <product-name :footerPrice="1" :products="configData.products" :compareNumber="compareNumber" @clear="clear" @goAddSeries="addSeriesPop"></product-name>
+        </div>
+        
+        <list style="flex:1" @scroll="scroll" offset-accuracy="40">
+            <!-- <header>
+                
+                
+            </header> -->
             <!--对比车型选项-->
             <cell class="model" ref="车型信息">
                 <div class="title">
@@ -39,13 +55,13 @@
                     <div class="content footer-price">
                         <text class="content-text" v-if="configData.lowPrice[0] && configData.lowPrice[0].F_BigPrice && configData.lowPrice[0].F_BigPrice != 0 && configData.lowPrice[0].F_BigPrice != 'kong'">{{configData.lowPrice[0] && configData.lowPrice[0].F_BigPrice}}万</text>
                         <text class="content-text" v-if="configData.lowPrice[0] && !configData.lowPrice[0].F_BigPrice && configData.lowPrice[0].F_BigPrice != 'kong'">暂无报价</text>
-                        <text class="footer-price-text"  v-if="configData.lowPrice[0] && configData.lowPrice[0].F_BigPrice != 'kong'" @click="goFooterPirce(configData.products[0])">询价</text>
+                        <!-- <text class="footer-price-text"  v-if="configData.lowPrice[0] && configData.lowPrice[0].F_BigPrice != 'kong'" @click="goFooterPirce(configData.products[0])">询价</text> -->
                     </div>
                     <div class="column-line column-line-right"></div>
                     <div class="content footer-price">
                         <text class="content-text" v-if="configData.lowPrice[1] && configData.lowPrice[1].F_BigPrice && configData.lowPrice[1].F_BigPrice != 0 && configData.lowPrice[1].F_BigPrice != 'kong'">{{configData.lowPrice[1] && configData.lowPrice[1].F_BigPrice}}万</text>
                         <text class="content-text"  v-if="configData.lowPrice[1] && !configData.lowPrice[1].F_BigPrice && configData.lowPrice[1].F_BigPrice != 'kong'">暂无报价</text>
-                        <text class="footer-price-text" v-if="configData.lowPrice[1] && configData.lowPrice[1].F_BigPrice != 'kong'" @click="goFooterPirce(configData.products[1])">询价</text>
+                        <!-- <text class="footer-price-text" v-if="configData.lowPrice[1] && configData.lowPrice[1].F_BigPrice != 'kong'" @click="goFooterPirce(configData.products[1])">询价</text> -->
                     </div>
                 </div>
             </cell>
@@ -63,15 +79,20 @@
                     <div class="caption-placeholder"></div>
                     <div class="column-line column-line-left"></div>
                     <div class="content">
-                        <text class="content-text" v-if="item.value != 0">{{item.value + item.unit}}</text>
-                        <text class="content-empty-text" v-else>空</text>
+                        <text class="content-text" v-if="item.F_ParameterName !== '公告型号' && item.value != 0">{{item.value + item.unit}}</text>
+                        <!-- <text class="content-empty-text" v-if="item.value == 0">空</text> -->
+                        <text class="content-text blues" v-if="item.F_ParameterName === '公告型号'" @click="toWeb(item.value)">{{item.value}}</text>
                     </div>
                     <div class="column-line column-line-right"></div>
                     <div class="content">
-                        <text class="content-text" v-if="configData.paramList[1] && configData.paramList[1][i] && configData.paramList[1][i].list && configData.paramList[1][i].list[index] && configData.paramList[1][i].list[index].value && configData.paramList[1][i].list[index].value != 0">{{configData.paramList[1] && configData.paramList[1][i] && configData.paramList[1][i].list && configData.paramList[1][i].list[index] && configData.paramList[1][i].list[index].value + configData.paramList[1][i].list[index].unit}}</text>
-                        <text class="content-empty-text" v-else>空</text>
+                        <text class="content-text" v-if="configData['paramList'][1] && configData['paramList'][1][i] && configData['paramList'][1][i]['list'] && configData['paramList'][1][i]['list'][index] && configData['paramList'][1][i]['list'][index]['F_ParameterName'] !== '公告型号'">{{configData.paramList[1][i]['list'][index].value + configData.paramList[1][i]['list'][index].unit}}</text>
+                        <!-- <text class="content-empty-text" v-if="configData.paramList[1][i]['list'][index].value == 0">空</text> -->
+                        <text class="content-text blues" v-if="configData['paramList'][1] && configData['paramList'][1][i] && configData['paramList'][1][i]['list'] && configData['paramList'][1][i]['list'][index] && configData['paramList'][1][i]['list'][index]['F_ParameterName'] === '公告型号'" @click="toWeb(configData.paramList[1][i]['list'][index].value)">{{configData.paramList[1][i]['list'][index].value}}</text>
                     </div>
                 </div>
+            </cell>
+            <cell>
+                <text style="font-size: 24px;padding: 10px;color: #999;background-color: #fafafa;">注：不符合中华人民共和国法规的，例如国三/国四车型，国内已经不能上牌，仅供出口，或国内非公路内部转运等不上牌地区使用。此参数仅供参考，实际车型配置以店内实车为准。</text>
             </cell>
         </list>
         <!--分类框-->
@@ -90,34 +111,59 @@
         </div>
         <!--底层询底价浮层-->
         <footerInfo :footerInfo="footerInfo" :el="el"></footerInfo>
-
+        <!-- 车型筛选侧边栏 （3大类才有） -->
+        <sidebar :index="typeIndex" @subClassChange="subClassChange" @selectModelType="selectModelType" :list="sidebarData" page="config" type="subCate" v-if="showSidebar"></sidebar>
         <!--添加车系弹层-->
         <add-series :addSeriesShow="addSeriesShow" :selectProductPop="selectProductPop" @hideAddProduct="goSelectProduct" @goSelectProduct="goSelectProduct" @addSeriesPop="addSeriesPop" @selectModel="selectModel" :selectedProductId="selectedProductId" :compareData="compareData"></add-series>
-    </div>
+		<!-- weex分享 -->
+        <weexShare :shareParams="shareData" :showShare="showShare" @shareCallBack="shareCallBack"></weexShare>
+	</div>
 </template>
 
 <script type="text/babel">
-    let storage = weex.requireModule('storage')
+    const storage = weex.requireModule('storage')
+    const dom = weex.requireModule('dom')
+    const globalEvent = weex.requireModule('globalEvent')
+    const animation = weex.requireModule('animation')
 
     import title from '../components/title.vue'
-    import nav from '../components/nav.vue'
+    import filterType from '../components/filterResult/filterType.vue'
+    import sidebar from '../components/filter/sidebar.vue'
     import productName from '../components/config/productName.vue'
     import footerInfo from '../components/footerInfo.vue'
     import addSeries from '../components/config/addSeries.vue'
 
-    let dom = weex.requireModule('dom');
-    let globalEvent = weex.requireModule('globalEvent');
-
     export default {
         components:{
             title,
-            nav,
+            filterType,
+            sidebar,
             productName,
             footerInfo,
-            addSeries
+            addSeries,
         },
         data(){
             return {
+                // 是否三大类（卡车）
+                isTruck: false,
+                // 是否折叠车型筛选
+                hideModelFilter: true,
+                // 是否显示子类弹层
+                showSidebar: false,
+                // 筛选列表数据
+                filterTypeList: [],
+                // 侧边栏数据
+                sidebarData: [],
+                // 展开折叠动画锁
+                animationLock: true,
+                // 滚动锁
+                scrollLock: true,
+                // 分类列表部分的高度
+                // typeListHeight: '0',
+                // 选择条件param字段, 用-连接成string
+                paramsList: [],
+                // 筛选类型的index
+                typeIndex: 0,
                 //标题
                 titleName:'',
                 //车系信息 子类id && 车系id && 品牌id
@@ -167,11 +213,15 @@
                 //苹果头部白条
                 iosTop:false,
                 //统计
-                el:'产品库-子类车系配置页'
-
+				el:'产品库-子类车系配置页',
+				showShare: false,
+				// 分享数据
+				shareData: {}
             }
         },
         created(){
+            //前端监控
+            this.weexLogger('子类车系配置页')
 
             //发送PV
             storage.getItem('p4',p4 => {
@@ -195,9 +245,7 @@
                 this.goBack();
             });
 
-            if(weex.config.env.platform == 'iOS'){
-                this.iosTop = true;
-            }
+            this.iosTop = this.isIos()
 
             //如果有车型id，删除车型id
             storage.getItem('ProductId',ele => {
@@ -218,129 +266,291 @@
             storage.getItem('seriesInfo',ele => {
                 if(ele.result == 'success'){
                     this.seriesInfo = JSON.parse(ele.data)
-
-                    this.getData(this.ajaxUrl() + '/index.php?r=weex/series/config&subId=' + this.seriesInfo.F_SubCategoryId + '&seriesId=' + this.seriesInfo.F_SeriesId,ele => {
-                        if(ele.ok){
-                            this.configData = ele.data;
-                            //标题
-                            this.titleName = ele.data.seriesInfo.F_SeriesName + ele.data.seriesInfo.F_SubCategoryName + '配置';
-
-                            //发送GA
-                            this.goUrlGa(weex.config.deviceId,'product.m.360che.com','产品库-子类车系配置页',this.titleName)
-
-                            //对比车型信息
-                            this.configData.products = ele.data.products;
-
-                            //对比信息
-                            this.configData.paramList = ele.data.paramList;
-
-                            //低价和厂商报价
-                            this.configData.lowPrice = ele.data.lowPrice;
-
-                            //对比的数量
-                            this.compareNumber = ele.data.products.length,
-
-
-                            //赋值对比数据
-                            storage.getItem('compareData',compareData => {
-                                let data = {};
-                                //车系id
-                                let seriesId = this.seriesInfo.F_SubCategoryId;
-
-                                if(compareData.result == 'success'){
-                                    data = JSON.parse(compareData.data);
-                                }
-//                                else{
-//                                    let seriesId = this.seriesInfo.F_SubCategoryId;
-//
-//                                }
-                                data[seriesId] = [];
-                                //循环车型信息，存储车型id
-                                this.configData.products.forEach(productId => {
-                                    data[seriesId].push(productId.F_ProductId);
-                                });
-
-                                this.compareData = data[seriesId];
-
-                                storage.setItem('compareData',JSON.stringify(data),ele => {
-                                    //获取对比信息
-
-                                    //对比信息数据
-                                    this.compare = data;
-
-                                    //请求地址
-                                    let ajaxUrl;
-                                    //如果有车型id
-                                    if (data[this.seriesInfo.F_SubCategoryId].length) {
-                                        //车型id   默认是第一个
-                                        this.ProductId = data[this.seriesInfo.F_SubCategoryId][0];
-
-                                        //如果缓存数据的length == 2  如果有新添加的车型 查看哪个是新添加的
-                                        if (data[this.seriesInfo.F_SubCategoryId].length == 2) {
-                                            this.ProductId = data[this.seriesInfo.F_SubCategoryId];
-                                            //获取缓存  查看有没有新添加的车型
-                                            storage.getItem('compareNumber', compareNumber => {
-                                                if (compareNumber.result == 'success') {
-                                                    if (compareNumber.data == 0) {
-                                                        this.ProductId = data[this.seriesInfo.F_SubCategoryId][1];
-                                                    }
-                                                }
-                                            })
-                                        }
-                                        ajaxUrl = this.ajaxUrl() + '/index.php?r=weex/series/filtrate&subId=' + this.seriesInfo.F_SubCategoryId + '&productId=' + data[this.seriesInfo.F_SubCategoryId][0] + '&seriesId=' + this.seriesInfo.F_SeriesId + '&brandId=' + this.seriesInfo.F_BrandId
-                                    } else {
-                                        ajaxUrl = this.ajaxUrl() + '/index.php?r=weex/series/filtrate&subId=' + this.seriesInfo.F_SubCategoryId + '&seriesId=' + this.seriesInfo.F_SeriesId + '&brandId=' + this.seriesInfo.F_BrandId
-                                    }
-                                    //获取车系id
-                                    this.getData(ajaxUrl, res => {
-                                        if (res.ok) {
-                                            this.listInfo = res.data;
-                                            //品牌推荐列表
-                                            this.recommendList = res.data.recommend;
-
-                                            //品牌列表
-                                            this.brandList = res.data.brands;
-                                            //nav导航
-                                            this.indexNav = res.data.brandsKey;
-
-                                            //如果没有热门车型列表，默认进去品牌选项
-                                            if (!this.listInfo.hot) {
-                                                this.selected = 1;
-                                                console.log(this.selected)
-                                            }
-                                            console.log(this.listInfo)
-                                        }
-                                    })
-
-                                })
-                            })
-
-                        }
-                    })
-
+                    // 获取车系数据
+                    this.getSeriesData()
                 }
             });
         },
         methods:{
+			shareCallBack (data) {
+                // 分享成功
+                if (data.status === '0') {
+                    const platformList = ['微信好友', '微信朋友圈', 'QQ好友', 'QQ空间', '新浪微博', '复制链接']
+                    const platform = platformList[data.platform]
+                    this.eventGa(weex.config.deviceId, '分享产品库成功', this.el, platform)
+                }
+            },
+            toWeb (num) {
+                this.goUrl(`https://product.m.360che.com/gonggao/#/bulletin?v=${num}`)
+            },
+			// 分享弹层显示
+            shareShow () {
+                this.showShare = true
+            },
+            // 返回请求接口所用的param 例如：'111-4292-324'
+            getParamId () {
+                return [...this.paramsList].map(x => x.id).join('-')
+            },
+            // 自释放滚动锁
+            autoOpenScrollLock () {
+                // 锁上滚动锁并500ms后自动释放
+                this.scrollLock = false
+                clearTimeout(this.timer)
+                this.timer = setTimeout(() => {
+                    this.scrollLock = true
+                }, 500)
+            },
+            // 回到顶部
+            backTop () {
+                // 自释放滚动锁
+                this.autoOpenScrollLock()
+                dom.scrollToElement(this.$refs['车型信息'], { animated: false })
+            },
+            // 获取车系数据
+            getSeriesData () {
+                this.backTop()
+                this.showLoading()
+                this.getData(`${this.ajaxUrl()}/index.php?r=api/series/param&seriesId=${this.seriesInfo.F_SeriesId}&subId=${this.seriesInfo.F_SubCategoryId}&param=${this.getParamId()}`, ele => {
+                    if (ele.ok && ele.data.code) {
+						//分享数据
+						let shareData = ele.data.share
+						this.shareData = {
+							title: shareData.h1,
+							desc: shareData.title,
+							link: shareData.url,
+							imgUrl: shareData.img,
+						}
+                        // 给侧边栏添加不限选项
+                        ele.data.data.searchList.forEach(item => {
+                            item.selected = item.isSelect
+                            item.originName = item.name
+                            item.list && item.list.unshift({
+                                'name': '不限',
+                                'value': '不限',
+                                'type': item.name,
+                                'selected': false,
+                                'unlimited': true
+                            })
+                            if (item.isSelect) item.name = `${item.isSelectName}${item.unit}`
+                            
+                            let hasSelected = false
+                            item.list.forEach(_item => {
+                                _item.selected = _item.is_select
+                                if (!item.unit) item.unit = ''
+                                // 给非不限的加上单位
+                                if (!_item.unlimited) _item.name = `${_item.value}${item.unit}`
+                                if (_item.selected) hasSelected = true
+                            })
+                            item.list[0].selected = !hasSelected
+                        })
+
+                        const data = ele.data.data;
+
+                        let { 
+                            name,
+                            isThreeMains,
+                            seriesInfo,
+                            searchList,
+                            paramList,
+                            products,
+                            lowPrice,
+                            askPriceNum,
+                        } = data;
+
+                        // 设置折叠的高度
+                        // this.typeListHeight = this.getTypeHeight(searchList)
+
+                        // 设置是否3大类
+                        this.isTruck = isThreeMains
+                        
+                        // 赋值configData
+                        this.configData = data
+
+                        //标题
+                        this.titleName = name
+
+                        // 筛选列表数据
+                        this.filterTypeList = searchList
+
+                        // 更新seriesInfo
+                        this.seriesInfo = seriesInfo
+
+                        // 设置对比数量
+                        this.compareNumber = products.length
+
+                        //发送GA
+                        this.goUrlGa(weex.config.deviceId,'product.m.360che.com','产品库-子类车系配置页',this.titleName)
+
+
+                        //赋值对比数据
+                        storage.getItem('compareData',compareData => {
+                            let data = {};
+                            //车系id
+                            let seriesId = this.seriesInfo.F_SubCategoryId;
+
+                            if(compareData.result == 'success'){
+                                data = JSON.parse(compareData.data);
+                            }
+                            data[seriesId] = [];
+                            //循环车型信息，存储车型id
+                            this.configData.products.forEach(productId => {
+                                data[seriesId].push(productId.F_ProductId);
+                            });
+
+                            this.compareData = data[seriesId];
+
+                            storage.setItem('compareData',JSON.stringify(data),ele => {
+                                //获取对比信息
+
+                                //对比信息数据
+                                this.compare = data;
+
+                                //请求地址
+                                let ajaxUrl;
+                                //如果有车型id
+                                if (data[this.seriesInfo.F_SubCategoryId].length) {
+                                    //车型id   默认是第一个
+                                    this.ProductId = data[this.seriesInfo.F_SubCategoryId][0];
+
+                                    //如果缓存数据的length == 2  如果有新添加的车型 查看哪个是新添加的
+                                    if (data[this.seriesInfo.F_SubCategoryId].length == 2) {
+                                        this.ProductId = data[this.seriesInfo.F_SubCategoryId];
+                                        //获取缓存  查看有没有新添加的车型
+                                        storage.getItem('compareNumber', compareNumber => {
+                                            if (compareNumber.result == 'success') {
+                                                if (compareNumber.data == 0) {
+                                                    this.ProductId = data[this.seriesInfo.F_SubCategoryId][1];
+                                                }
+                                            }
+                                        })
+                                    }
+                                    ajaxUrl = this.ajaxUrl() + '/index.php?r=weex/series/filtrate&subId=' + this.seriesInfo.F_SubCategoryId + '&productId=' + data[this.seriesInfo.F_SubCategoryId][0] + '&seriesId=' + this.seriesInfo.F_SeriesId + '&brandId=' + this.seriesInfo.F_BrandId
+                                } else {
+                                    ajaxUrl = this.ajaxUrl() + '/index.php?r=weex/series/filtrate&subId=' + this.seriesInfo.F_SubCategoryId + '&seriesId=' + this.seriesInfo.F_SeriesId + '&brandId=' + this.seriesInfo.F_BrandId
+                                }
+                                //获取车系id
+                                this.getData(ajaxUrl, res => {
+                                    if (res.ok) {
+                                        this.listInfo = res.data;
+                                        //品牌推荐列表
+                                        this.recommendList = res.data.recommend;
+
+                                        //品牌列表
+                                        this.brandList = res.data.brands;
+                                        //nav导航
+                                        this.indexNav = res.data.brandsKey;
+
+                                        //如果没有热门车型列表，默认进去品牌选项
+                                        if (!this.listInfo.hot) {
+                                            this.selected = 1;
+                                            // console.log(this.selected)
+                                        }
+                                        // console.log(this.listInfo)
+                                    }
+                                })
+
+                                if (this.configData.products.length === 1) {
+                                    this.configData.products.push({
+                                        F_BigPrice: 'kong',
+                                        F_Price: 'kong',
+                                    })
+                                }
+                            })
+                        })
+
+                    }
+                    this.hideLoading()
+                })
+            },
+            // 计算属性列表的高度
+            // getTypeHeight (typeList = [null]) {
+            //     return String(16 + Math.ceil( typeList.length / 3 ) * 84)
+            // },
+            // 切换（show/hide） 车型筛选
+            toggleModelFilter () {
+                if (!this.scrollLock) return false
+                this.hideModelFilter = !this.hideModelFilter
+                // if (!this.animationLock || !this.scrollLock) return false
+                // this.animationLock = false
+                // const height = this.hideModelFilter ? this.typeListHeight : '0'
+                // animation.transition(this.$refs.filterTypeWrapper, {
+                //     styles: {
+                //         height: height,
+                //     },
+                //     duration: 300, //ms
+                //     timingFunction: 'ease-out',
+                //     needLayout: true, // 改变高度要开启布局模式
+                //     delay: 0 //ms
+                // }, () => {
+                //     this.hideModelFilter = !this.hideModelFilter
+                //     this.animationLock = true
+                // })
+            },
+            // 子类弹层显示隐藏切换
+            subClassChange () {
+                this.showSidebar = !this.showSidebar
+            },
+            // 显示车型筛选侧边栏
+            showFilterSidebar (fid, index) {
+                // 这里用不到fid fid为undefined
+                let data = this.configData
+                // 设置筛选类型的index
+                this.typeIndex = index
+                this.sidebarData = data.searchList[index]
+                
+                // 子类弹层显示
+                this.subClassChange()
+            },
+            // 弹层里选择了某个属性
+            selectModelType (data, index) {
+                if (data.unlimited) {
+                    // 不限
+                    this.filterTypeList[index].name = data.type
+                    this.filterTypeList[index].selected = 0
+
+                    this.paramsList.forEach((item, paramIndex) => {
+                        if (item.index === index) {
+                            // 点击不限的时候 删除这个分类的参数
+                            this.paramsList.splice(paramIndex, 1)
+                        }
+                    })
+                } else {
+                    // this.filterTypeList[index].name = `${data.value}${data.unit}`
+                    this.filterTypeList[index].name = data.name
+                    this.filterTypeList[index].selected = 1
+                    
+                    let hasThis = false,
+                        id = encodeURIComponent(data.param);
+                    this.paramsList.forEach(item => {
+                        // 有相关对象之间修改
+                        if (item.index === index) {
+                            item.id = id
+                            hasThis = true
+                        }
+                    })
+                    // 无相关对象新加一个
+                    !hasThis && this.paramsList.push({
+                        id: id,
+                        index: index,
+                    })
+                }
+                console.log(data)
+                this.getSeriesData()
+                this.subClassChange()
+            },
             //清除数据
             clear(index){
-                this.configData.products[index].F_ProductName = '';
+                this.configData.products[index].F_ProductName = ''
 
-                this.configData.paramList.forEach((ele,key) => {
-                    if(key == index){
+                //清除厂商指导价 && 本地最低报价
+                this.configData.lowPrice[index].F_BigPrice = 'kong'
+                this.configData.products[index].F_Price = 'kong'
 
-                        //清除厂商指导价 && 本地最低报价
-                        this.configData.lowPrice[key].F_BigPrice = 'kong';
-
-                        this.configData.products[key].F_Price = 'kong';
-
-                        ele.forEach((res,number) => {
-                           res.list.forEach((result,i) => {
-                               result.value = '';
-                               result.unit = '';
-                           })
-                        })
-                    }
+                this.configData.paramList[index].forEach((res, number) => {
+                    res.list.forEach(result => {
+                       result.value = ''
+                       result.unit = ''
+                    })
                 })
 
                 //清除缓存
@@ -379,15 +589,15 @@
             },
             //锚点效果
             anchor(index){
-                let ele ;
+                let ele;
                 if(index == '车型信息'){
-                    ele = this.$refs[index];
+                    ele = this.$refs[index]
                 }else{
                     ele = this.$refs[index][0]
                 }
 
-                dom.scrollToElement(ele, {offset: -288})
-                this.classifyPop = false;
+                dom.scrollToElement(ele)
+                this.classifyPop = false
             },
             //询底价
             goFooterPirce(proInfo){
@@ -400,15 +610,22 @@
                 })
             },
             //标题吸顶
-            sticky(event){
+            scroll(event){
                 //如果分类锚点弹层显示 && 隐藏
                 if(this.classifyPop){
                     this.classifyPop = false;
                 }
+                // 筛选条件展开时候 用户查看对比信息要收起它
+                if (!this.hideModelFilter) {
+                    this.toggleModelFilter()
+                }
+                // 自释放滚动锁
+                this.autoOpenScrollLock()
             },
             //显示选择车系列表弹层 || 隐藏选择车系列表弹层
             addSeriesPop(){
-
+                // 隐藏分类弹层
+                this.classifyPop = false
                 //显示隐藏选择车系列表
                 this.addSeriesShow = !this.addSeriesShow;
 
@@ -422,9 +639,32 @@
             goSelectProduct(){
                 this.selectProductPop = !this.selectProductPop;
             },
+            // 重置筛选相关的数据
+            resetFilterData () {
+                this.filterTypeList.forEach(item => {
+                    // 恢复原始分类未选中状态
+                    item.selected = 0
+                    // 恢复原始分类名字
+                    item.name = item.originName
+                    // 侧边栏相关数据重置
+                    item.list.forEach(_item => {
+                        // 选中不限 其余不选中
+                        _item.selected = _item.unlimited ? 1 : 0
+                        // 解除所有禁用
+                        _item.is_disable = 0
+                    })
+                })
+                // 清空筛选数据辅助数组
+                this.paramsList = []
+            },
             //选择车型
             selectModel(ele){
-
+                // 回到顶部
+                this.backTop()
+                // 重置筛选相关的数据
+                this.resetFilterData()
+                // 折叠筛选条件
+                this.hideModelFilter = true
                 //查看对比缓存
                 storage.getItem('compareData',compareData => {
                     if(compareData.result == 'success'){
@@ -442,7 +682,7 @@
                                         proId = ele.F_ProductId + '_' + data[this.seriesInfo.F_SubCategoryId][0];
                                         data[this.seriesInfo.F_SubCategoryId].unshift(ele.F_ProductId)
                                     }
-                                    console.log(data[this.seriesInfo.F_SubCategoryId])
+                                    // console.log(data[this.seriesInfo.F_SubCategoryId])
                                 }else{
                                     proId = ele.F_ProductId
                                     data[this.seriesInfo.F_SubCategoryId].push(ele.F_ProductId)
@@ -487,7 +727,7 @@
                                                     })
                                                 }
 
-                                                //存储对比记录
+                                                //存储对比记录对比记录
                                                 storage.getItem('compare_history',history => {
                                                     let data = [];
                                                     if(history.result == 'success'){
@@ -528,6 +768,28 @@
 </script>
 
 <style scoped>
+    .filter-type-wrapper {
+        background-color: #fff;
+    }
+    .model-filter {
+        height: 80px;
+        flex-direction: row;
+        justify-content: center;
+        align-items: center;
+        background-color: #FAFAFA;
+        border-bottom-width: 20px;
+        border-bottom-style: solid;
+        border-bottom-color: #f5f5f5;
+    }
+    .model-filter-text {
+        font-size: 24px;
+        color: #333;
+    }
+    .model-filter-icon {
+        margin-left: 10px;
+        width: 30px;
+        height: 18px;
+    }
     .ios-top{
         height:40px;
         background-color: #fff;
@@ -585,10 +847,10 @@
     .option-list{
 
     }
-    .model{
-        border-top-width:20px;
-        border-top-style:solid;
-        border-top-color:#f5f5f5;
+    .product-name-warpper {
+        border-bottom-width:20px;
+        border-bottom-style:solid;
+        border-bottom-color:#f5f5f5;
     }
     .title{
         height:90px;
@@ -701,4 +963,5 @@
         border-bottom-left-radius:4px;
         border-bottom-right-radius:4px;
     }
+    .blues{color:#586c94;}
 </style>
