@@ -448,7 +448,7 @@
             //请求经销商数据
             getDealerData(){
                 let proId = this.ProductId;
-                this.getData(this.ajaxUrl() + '/index.php?r=weex/series/dealer&subCateId=' + this.seriesInfo.F_SubCategoryId + '&seriesId=' + this.seriesInfo.F_SeriesId + '&provinceId=' + this.locationInfo.provinceId + '&cityId=' + this.locationInfo.cityId + '&proId=' + this.ProductId + '&' + new Date().getTime(),(ele) => {
+                this.getData('https://dealer-api.360che.com/APIDealerToProduct/Product/getdealerlist_multparamJson_app.aspx?subCateId=' + this.seriesInfo.F_SubCategoryId + '&seriesId=' + this.seriesInfo.F_SeriesId + '&provinceId=' + this.locationInfo.provinceId + '&cityId=' + this.locationInfo.cityId + '&productid=' + this.ProductId + '&' + new Date().getTime(),(ele) => {
                     if(ele.ok){
 //                        this.alert(this.ProductId)
                         this.dealerData = ele.data;

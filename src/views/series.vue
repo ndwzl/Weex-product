@@ -354,7 +354,7 @@
 
             //请求经销商数据
             getDealerData(){
-                this.getData(this.ajaxUrl() + '/index.php?r=weex/series/dealer&subCateId=' + this.seriesInfo.F_SubCategoryId + '&seriesId=' + this.seriesInfo.F_SeriesId + '&provinceId=' + this.locationInfo.provinceId + '&cityId=' + this.locationInfo.cityId + '&' + new Date().getTime(),(ele) => {
+                this.getData('https://dealer-api.360che.com/APIDealerToProduct/Product/getdealerlist_multparamJson_app.aspx?subCateId=' + this.seriesInfo.F_SubCategoryId + '&seriesId=' + this.seriesInfo.F_SeriesId + '&provinceId=' + this.locationInfo.provinceId + '&cityId=' + this.locationInfo.cityId + '&' + new Date().getTime(),(ele) => {
                     if(ele.ok){
                         // debug: 服务端未过滤制表符 weex内不识别 替换制表符·（&#183;）
                         ele.data.list.length && ele.data.list.forEach(item => {
